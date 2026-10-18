@@ -24,19 +24,19 @@ If you would rather not run `corepack enable`, prefix commands with
 
 ## Scripts
 
-| Script                              | What it does                                               |
-| ----------------------------------- | ---------------------------------------------------------- |
-| `pnpm dev`                          | Development server                                         |
-| `pnpm build`                        | Production build                                           |
-| `pnpm start`                        | Serve the production build                                 |
-| `pnpm lint`                         | ESLint, fails on any warning                               |
-| `pnpm typecheck`                    | Generate route types, then `tsc --noEmit`                  |
-| `pnpm format`                       | Prettier (with Tailwind class sorting), write              |
-| `pnpm format:check`                 | Prettier, check only                                       |
-| `pnpm brand:colors`                 | Re-sample the palette from the logo (see `docs/brand.md`)  |
-| `pnpm brand:icons`                  | Regenerate favicon and Apple touch icon from the monogram  |
-| `pnpm i18n:check`                   | Validate translations against English (CI-ready exit code) |
-| `pnpm backdrop:generate [--seed N]` | Regenerate the ink-atmosphere art (see `docs/brand.md`)    |
+| Script                              | What it does                                                 |
+| ----------------------------------- | ------------------------------------------------------------ |
+| `pnpm dev`                          | Development server                                           |
+| `pnpm build`                        | Production build                                             |
+| `pnpm start`                        | Serve the production build                                   |
+| `pnpm lint`                         | ESLint, fails on any warning                                 |
+| `pnpm typecheck`                    | Generate route types, then `tsc --noEmit`                    |
+| `pnpm format`                       | Prettier (with Tailwind class sorting), write                |
+| `pnpm format:check`                 | Prettier, check only                                         |
+| `pnpm brand:colors`                 | Re-sample the palette from the logo (see `docs/brand.md`)    |
+| `pnpm brand:icons`                  | Regenerate favicon and Apple touch icon from the monogram    |
+| `pnpm i18n:check`                   | Validate translations against English (CI-ready exit code)   |
+| `pnpm backdrop:generate [--seed N]` | Regenerate the ink-atmosphere art (see `docs/atmosphere.md`) |
 
 Before every commit or deploy: `pnpm lint && pnpm typecheck && pnpm i18n:check && pnpm build`.
 
@@ -51,10 +51,10 @@ src/
       dev/backdrop/    TEMPORARY backdrop playground (dev only), delete before launch
     global-not-found.tsx, sitemap.ts, robots.ts, icons
   components/
-    atmosphere/        Backdrop (ink background art), composition, flash
+    atmosphere/        Backdrop (mask tiles), LightningStorm + lazy storm engine, config
     brand/             Logo (single source), GrainOverlay, DiamondDivider
     layout/            Header, LanguageSwitcher, MobileMenu, Footer, SkipLink
-    motion/            Reveal, SmoothScroll (Lenis)
+    motion/            Reveal (CSS scroll-driven, zero JS), SmoothScroll (Lenis)
     portfolio/         Gallery components (Phase 4+)
     ui/                Generic building blocks
   content/             Language-neutral data (site facts, nav structure)
@@ -62,16 +62,18 @@ src/
   messages/<locale>/   All user-visible text, one JSON file per namespace
   lib/
     drive/             All Google Drive logic, server-only (Phase 4)
-    motion/            Motion tokens, variants, reduced-motion helper
+    indexing.ts        SITE_INDEXING switch (noindex until launch)
+    site-url.ts        Base URL resolution
   styles/
     tokens.css         Design tokens (CSS variables)
     fonts.ts           next/font setup
 public/
-  backdrop/            Generated atmosphere art (pnpm backdrop:generate)
+  backdrop/            Generated atmosphere: tiles/*.avif masks, storm.json, grain
   brand/               Logo files (TEMP until the artist delivers vectors)
   sample/              Fallback portfolio images (used when Drive is unavailable)
 docs/brand.md          Palette, logo, TEMP assets, typography, atmosphere
 docs/i18n.md           i18n decision, architecture, translation status
+docs/atmosphere.md     Background art and lightning storm: design, budgets, tuning
 docs/review/           Screenshots for design review, per phase
 scripts/               Dev tooling (colours, icons, backdrop, i18n check)
 ```

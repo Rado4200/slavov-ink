@@ -129,35 +129,11 @@ renders in Cormorant/Manrope, with no fallback font.
 
 ## Ink atmosphere (background art)
 
-Calligraphic brush strokes, ink splashes and one lightning bolt, generated
-from a seed so the result is reproducible.
-
-- **Generator:** `pnpm backdrop:generate [--seed N]` (core in
-  `scripts/backdrop/core.mjs`, seeded mulberry32 RNG, no `Math.random`).
-  - Strokes sweep a flat rectangular nib at a fixed 35–45° angle along Bézier
-    centrelines, so thick/thin follows the stroke direction like a broad-edge
-    pen. Rough edges and dry-brush bristle tails are baked into the geometry.
-    Each step is a convex hull; all hulls are one `<path>` with nonzero fill.
-  - Splashes: a noisy main blob with spikes thrown mostly in one direction,
-    satellite droplets, bead trails and specks.
-  - Lightning: midpoint displacement with 1–2 forks. Style A is a hairline,
-    B has a visible glow. The glow is stacked wide, faint `royal-light`
-    strokes, not a blur filter.
-  - Output: `public/backdrop/*.svg` (used as CSS masks, so colour comes from
-    tokens), `grain.webp` (pre-rendered film grain), and
-    `src/components/atmosphere/backdrop-manifest.json`. The script fails if
-    the total exceeds 150 KB (currently about 115 KB raw).
-- **Composition:** `src/components/atmosphere/composition.ts` (hand-placed
-  layers per variant, `home` / `inner`, fewer on narrow screens).
-- **Tuning:** `--backdrop-intensity` in `tokens.css` (0–1) scales every layer;
-  `HOME_LIGHTNING` in `Backdrop.tsx` picks A, B or none. Compare everything
-  on `/en/dev/backdrop`.
-- **Rules:** decorative only (`aria-hidden`, no pointer events). Palette
-  tokens only. Bone layers at ≤ 0.1 opacity and purples at ≤ 0.35 keep text
-  above AA (measured worst case 12.5:1). Motion is transform/opacity only:
-  desktop parallax via CSS scroll-driven animations (no JS), and one soft
-  2-pulse lightning flash per session. Both are off under
-  `prefers-reduced-motion`.
+Dry-brush calligraphic strokes (one coherent 40° nib), fine spatter and an
+automatic lightning storm (bone-white core, royal-light surround). Generated
+from a seed (`pnpm backdrop:generate`), shipped as AVIF alpha masks painted
+over palette tokens, capped to keep body text at or above 4.5:1. Full details,
+budgets and tuning: [docs/atmosphere.md](atmosphere.md).
 
 ## Open questions for the rework
 
