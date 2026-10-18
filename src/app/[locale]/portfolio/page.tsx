@@ -1,14 +1,27 @@
 import type { Metadata } from "next";
 
+import { Backdrop } from "@/components/atmosphere/Backdrop";
 import { PageHero } from "@/components/ui/PageHero";
-import { portfolioPage } from "@/content/pages";
+import { getLocale, getMessages } from "@/i18n/messages";
+import { pageMetadata } from "@/i18n/metadata";
 
-export const metadata: Metadata = {
-  title: portfolioPage.title,
-  description: portfolioPage.description,
-  alternates: { canonical: "/portfolio" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const m = await getMessages();
+  return pageMetadata({
+    locale,
+    path: "/portfolio",
+    title: m.portfolio.metaTitle,
+    description: m.portfolio.metaDescription,
+  });
+}
 
-export default function PortfolioPage() {
-  return <PageHero content={portfolioPage} />;
+export default async function PortfolioPage() {
+  const m = await getMessages();
+  return (
+    <div className="relative isolate">
+      <Backdrop variant="inner" />
+      <PageHero heading={m.portfolio.heading} intro={m.portfolio.intro} />
+    </div>
+  );
 }

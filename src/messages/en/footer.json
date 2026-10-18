@@ -1,0 +1,8 @@
+{
+  "contactHeading": "Contact",
+  "bookingHeading": "Booking",
+  "socialHeading": "Follow",
+  "bookingStatus": "TODO: booking status (open / closed / waitlist)",
+  "bookingInstructions": "TODO: how to book (DM, email, deposit policy)",
+  "copyright": "© {year} {brand}. All rights reserved."
+}

@@ -1,18 +1,20 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import type { KeyboardEvent } from "react";
+import type { KeyboardEvent, ReactNode } from "react";
 import { usePathname } from "next/navigation";
 
 import { DiamondDivider } from "@/components/brand/DiamondDivider";
 import { NavLinks } from "@/components/layout/NavLinks";
-import type { NavItem } from "@/content/navigation";
-import { ui } from "@/content/ui";
+import type { NavLinkItem } from "@/components/layout/NavLinks";
 
 const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 type MobileMenuProps = {
-  items: NavItem[];
+  items: NavLinkItem[];
+  labels: { dialog: string; nav: string; open: string; close: string };
+  /** Rendered at the bottom of the dialog (the language switcher). */
+  footer?: ReactNode;
 };
 
 /**
@@ -20,7 +22,7 @@ type MobileMenuProps = {
  * inert, ESC closes it, and focus returns to the trigger on close. Tab is
  * additionally wrapped so focus never leaves the dialog.
  */
-export function MobileMenu({ items }: MobileMenuProps) {
+export function MobileMenu({ items, labels, footer }: MobileMenuProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [open, setOpen] = useState(false);
   const dialogId = useId();
@@ -62,7 +64,7 @@ export function MobileMenu({ items }: MobileMenuProps) {
         aria-controls={dialogId}
         className="-mr-2 inline-flex size-11 items-center justify-center text-bone md:hidden"
       >
-        <span className="sr-only">{ui.openMenu}</span>
+        <span className="sr-only">{labels.open}</span>
         <span aria-hidden="true" className="flex w-6 flex-col gap-1.5">
           <span className="h-px w-full bg-current" />
           <span className="h-px w-2/3 self-end bg-current" />
@@ -73,20 +75,20 @@ export function MobileMenu({ items }: MobileMenuProps) {
       <dialog
         ref={dialogRef}
         id={dialogId}
-        aria-label={ui.mobileNavLabel}
+        aria-label={labels.dialog}
         onClose={() => setOpen(false)}
         onKeyDown={trapFocus}
+        data-lenis-prevent
         className="fixed inset-0 m-0 h-dvh max-h-none w-full max-w-none bg-ink bg-veil text-bone opacity-0 transition-[opacity,display,overlay] transition-discrete duration-base ease-out-quart backdrop:bg-ink open:opacity-100 md:hidden starting:open:opacity-0"
       >
-        <div className="flex h-full flex-col px-gutter pb-10">
+        <div className="flex h-full flex-col px-gutter pb-8">
           <div className="flex h-header items-center justify-end">
             <button
               type="button"
               onClick={close}
-              autoFocus
               className="-mr-2 inline-flex size-11 items-center justify-center text-bone"
             >
-              <span className="sr-only">{ui.closeMenu}</span>
+              <span className="sr-only">{labels.close}</span>
               <span aria-hidden="true" className="relative block size-6">
                 <span className="absolute top-1/2 left-0 h-px w-full rotate-45 bg-current" />
                 <span className="absolute top-1/2 left-0 h-px w-full -rotate-45 bg-current" />
@@ -94,7 +96,7 @@ export function MobileMenu({ items }: MobileMenuProps) {
             </button>
           </div>
 
-          <nav aria-label={ui.mainNavLabel} className="flex flex-1 flex-col justify-center">
+          <nav aria-label={labels.nav} className="flex flex-1 flex-col justify-center">
             <NavLinks
               items={items}
               onNavigate={close}
@@ -104,6 +106,7 @@ export function MobileMenu({ items }: MobileMenuProps) {
           </nav>
 
           <DiamondDivider variant="triple" />
+          {footer ? <div className="mt-4 flex justify-center">{footer}</div> : null}
         </div>
       </dialog>
     </>

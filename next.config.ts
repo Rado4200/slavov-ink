@@ -11,6 +11,10 @@ const includeDevRoutes =
 const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
+  experimental: {
+    // Branded 404 for URLs outside every locale (src/app/global-not-found.tsx).
+    globalNotFound: true,
+  },
   pageExtensions: includeDevRoutes ? ["tsx", "ts", "dev.tsx"] : ["tsx", "ts"],
   turbopack: {
     rules: {
