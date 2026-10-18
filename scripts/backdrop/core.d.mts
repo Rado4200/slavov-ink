@@ -2,40 +2,65 @@
 
 export type Rng = () => number;
 
-export type StrokeKind = "arc" | "flick" | "slash" | "hook" | "swash" | "comma";
+export type Family = "long" | "bundle" | "medium" | "short" | "hook";
+export type FamilyOrSpatter = Family | "spatter";
+export type Layer = "royal" | "royal-light" | "bone";
+export type Variant = "desktop" | "mobile";
 
-export type Shape = { d: string; width: number; height: number };
+export type TileElement = { layer: Layer; alpha: number; d: string; family: string };
 
-export type TokenColor = "bone" | "royal-light";
+export type Tile = {
+  width: number;
+  height: number;
+  safe: [number, number];
+  elements: TileElement[];
+};
 
-export type LightningLayer = {
-  d: string;
-  /** CSS px, rendered with vector-effect: non-scaling-stroke. */
-  strokeWidth: number;
-  color: TokenColor;
+export type ComposeOptions = {
+  variant?: Variant;
+  nibAngle?: number;
+  density?: number;
+  families?: Set<FamilyOrSpatter>;
+};
+
+export type BoltLayer = {
+  part: "all" | "main" | "forks";
+  width: number;
+  color: "bone" | "royal-light";
   opacity: number;
 };
 
-export type LightningStyle = "A" | "B";
+export type BoltStyle = "hairline" | "bold";
 
-export type Lightning = {
+export type Bolt = {
+  style: BoltStyle;
   width: number;
   height: number;
-  styles: Record<LightningStyle, LightningLayer[]>;
+  length: number;
+  main: string;
+  forks: string;
 };
 
-export type BackdropSet = {
-  seed: number;
-  strokes: Array<Shape & { kind: StrokeKind }>;
-  splashes: Shape[];
-  lightning: Lightning;
-};
+export type Storm = { styles: Record<BoltStyle, BoltLayer[]>; bolts: Bolt[] };
+
+export const FAMILIES: Family[];
+export const LAYERS: Layer[];
+export const TILES: Record<
+  Variant,
+  { width: number; height: number; scale: number; safe: [number, number]; edgePower: number }
+>;
+export const DEFAULTS: { nibAngle: number; density: number };
+export const SAFE_CAPS: Record<Layer, number>;
 
 export function createRng(seed: number): Rng;
-export function generateStroke(rng: Rng, kind: StrokeKind): Shape & { kind: StrokeKind };
-export function generateSplash(rng: Rng): Shape;
-export function generateLightning(rng: Rng): Lightning;
-export function generateSet(seed: number): BackdropSet;
-
-export const STROKE_ORDER: StrokeKind[];
-export const SPLASH_COUNT: number;
+export function hashSeed(...parts: Array<string | number>): number;
+export function composeTile(seed: number, options?: ComposeOptions): Tile;
+export function tileLayersToSvg(tile: Tile): Record<Layer, string | null>;
+export function generateStorm(seed: number, count?: number): Storm;
+export function familySample(
+  seed: number,
+  family: Family,
+  cell: { width: number; height: number },
+  nibAngle?: number,
+): string;
+export function spatterSample(seed: number, cell: { width: number; height: number }): string;
