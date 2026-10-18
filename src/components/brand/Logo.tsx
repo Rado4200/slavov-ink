@@ -1,20 +1,34 @@
 import Image from "next/image";
+import type { StaticImageData } from "next/image";
 
-import logoSource from "../../../public/brand/logo-current.png";
-import { ui } from "@/content/ui";
+import fullSource from "../../../public/brand/logo-current.png";
+import monogramSource from "../../../public/brand/monogram-temp.png";
+import { site } from "@/content/site";
+
+type Crop = { x: number; y: number; width: number; height: number };
 
 /**
- * The single entry point for the brand logo. Swap the logo by replacing the
- * imported file and updating LOGO_CROP below; nothing else references it.
- * (Favicons are generated from the same file: pnpm brand:icons.)
+ * The single entry point for the brand logo. Swap a variant by replacing its
+ * imported file and crop below; nothing else references the logo files.
+ * (Favicons are generated from the monogram: pnpm brand:icons.)
  *
- * The current asset is a raster lockup centred on a large black canvas.
- * LOGO_CROP is the lockup's bounding box in source pixels (measured with sharp,
- * plus ~10px safety margin), so the canvas padding is never rendered.
+ * TEMP assets (see docs/brand.md): the full lockup is a raster centred on a
+ * large black canvas, so its crop is the lockup's bounding box in source pixels
+ * (measured with sharp, plus ~10px margin). The monogram file is already tight.
  */
-const LOGO_CROP = { x: 329, y: 499, width: 950, height: 1438 } as const;
+const VARIANTS = {
+  full: {
+    src: fullSource,
+    crop: { x: 329, y: 499, width: 950, height: 1438 },
+  },
+  monogram: {
+    src: monogramSource,
+    crop: { x: 0, y: 0, width: monogramSource.width, height: monogramSource.height },
+  },
+} satisfies Record<string, { src: StaticImageData; crop: Crop }>;
 
 const SIZES = {
+  xs: 40,
   sm: 48,
   md: 96,
   lg: 200,
@@ -22,12 +36,14 @@ const SIZES = {
 } as const;
 
 export type LogoSize = keyof typeof SIZES;
-export type LogoVariant = "plain" | "glow";
+export type LogoVariant = keyof typeof VARIANTS;
 
 type LogoProps = {
-  /** Rendered height of the lockup. */
-  size?: LogoSize;
   variant?: LogoVariant;
+  /** Rendered height. */
+  size?: LogoSize;
+  /** Adds the token purple glow around the logo shape. */
+  glow?: boolean;
   /** Set for the LCP logo only (eager load + preload). */
   preload?: boolean;
   /** Empty string when the logo is decorative next to a text label. */
@@ -36,28 +52,30 @@ type LogoProps = {
 };
 
 export function Logo({
+  variant = "full",
   size = "md",
-  variant = "plain",
+  glow = false,
   preload = false,
-  alt = ui.logoAlt,
+  alt = site.name,
   className,
 }: LogoProps) {
+  const { src, crop } = VARIANTS[variant];
   const height = SIZES[size];
-  const width = Math.round((height * LOGO_CROP.width) / LOGO_CROP.height);
-  const scale = logoSource.width / LOGO_CROP.width;
+  const width = Math.round((height * crop.width) / crop.height);
+  const scale = src.width / crop.width;
   const renderedImageWidth = Math.ceil(width * scale);
 
   return (
     <span
       className={[
         "relative inline-block shrink-0 overflow-hidden mix-blend-lighten",
-        variant === "glow" ? "drop-shadow-glow" : "",
+        glow ? "drop-shadow-glow" : "",
         className ?? "",
       ].join(" ")}
       style={{ width, height }}
     >
       <Image
-        src={logoSource}
+        src={src}
         alt={alt}
         preload={preload}
         loading={preload ? "eager" : "lazy"}
@@ -66,8 +84,8 @@ export function Logo({
         style={{
           width: `${scale * 100}%`,
           height: "auto",
-          left: `${(-LOGO_CROP.x / LOGO_CROP.width) * 100}%`,
-          top: `${(-LOGO_CROP.y / LOGO_CROP.height) * 100}%`,
+          left: `${(-crop.x / crop.width) * 100}%`,
+          top: `${(-crop.y / crop.height) * 100}%`,
         }}
       />
     </span>
