@@ -83,30 +83,85 @@ Texture: every white element is distressed (grunge scratches and mottling from
 - **Clear space.** Keep empty space of at least **25 % of the lockup width**
   on all sides. No text, image edges or UI chrome inside that zone.
 - **Minimum size.** 96 px tall for the full lockup, the size where the vertical
-  SLAVOV letters stay readable. 48 px tall is allowed only as the header home
-  link, where the link carries an accessible name. Below 48 px, do not use it
-  (a simplified mark is needed; see open questions).
+  SLAVOV letters stay readable. Below that, use the monogram (header: 40 px tall).
 - **Do not** recolour, stretch, rotate, outline, add effects other than the
-  token glow (`variant="glow"`), or rebuild the lettering in a web font.
+  token glow (the `glow` prop), or rebuild the lettering in a web font.
 - **Single source.** Render the logo only through
-  `src/components/brand/Logo.tsx`. To replace it: drop the new file in
-  `public/brand/`, update the import and `LOGO_CROP` in that component, then
-  run `pnpm brand:icons` (favicon and Apple touch icon are generated from the
-  logo file) and `pnpm brand:colors`.
+  `src/components/brand/Logo.tsx` (`variant="full" | "monogram"`). See
+  [TEMP assets](#temp-assets-to-be-replaced-by-the-artist) for replacing the files.
+
+## TEMP assets (to be replaced by the artist)
+
+The artist is reworking the logo into one unified brand. Until the final files
+arrive, two TEMP rasters stand in:
+
+| File                             | What                                                                | Used for                                      |
+| -------------------------------- | ------------------------------------------------------------------- | --------------------------------------------- |
+| `public/brand/logo-current.png`  | Original lockup on black (1654 × 2339)                              | `<Logo variant="full">`: home hero, footer    |
+| `public/brand/monogram-temp.png` | **TEMP** crop of the S monogram with its frame, on black, 378 × 512 | `<Logo variant="monogram">`: header, favicons |
+
+The monogram crop is source pixels x 350–1092, y 490–1495 of the lockup: the
+frame plus the S, stopping above the purple INK echo and left of the SLAVOV
+wordmark. It is 512 px tall, at least 2× its largest planned render (the
+180 px Apple touch icon; the header uses 40 px).
+
+**Replacing them:** drop the final SVG logo and vector monogram into
+`public/brand/`, point the two imports in `src/components/brand/Logo.tsx` at
+them and set each variant's crop to the full image, then run `pnpm brand:icons`.
+No other component changes. Once both are vectors, the on-black-only rule and
+the `mix-blend-mode: lighten` workaround can go.
 
 ## Typography (provisional)
 
-Chosen in Phase 1, pending review on the temporary `/dev/type` route:
+Working pair, to be finalized after review in all four languages on `/en/dev/type`:
 
-| Role                        | Font       | Notes                                            |
-| --------------------------- | ---------- | ------------------------------------------------ |
-| Display (rare accents only) | Pirata One | Blackletter echoing the monogram. Hero/404 only. |
-| Headings                    | Cormorant  | High-contrast serif, close to the SLAVOV serif.  |
-| Body                        | Manrope    | Clean geometric sans, readable on black.         |
+| Role                        | Font       | Subsets                    | Notes                                                                                               |
+| --------------------------- | ---------- | -------------------------- | --------------------------------------------------------------------------------------------------- |
+| Display (rare accents only) | Pirata One | latin, latin-ext           | **No Cyrillic.** Only for text identical in every language: the brand name, numerals (404), glyphs. |
+| Headings                    | Cormorant  | latin, latin-ext, cyrillic | High-contrast serif, close to the SLAVOV serif.                                                     |
+| Body                        | Manrope    | latin, latin-ext, cyrillic | Clean geometric sans, readable on black.                                                            |
+
+All `@font-face` rules carry a `unicode-range`, so a page downloads only the
+subsets it uses. Only Manrope is preloaded (body text is the inner pages' LCP);
+Cormorant and Pirata One swap in. Verified with DevTools platform-font data:
+every BG/EN/ES/DE sample glyph (ъ ь ю я щ, ñ ¿ ¡ á é í ó ú ü, ä ö ü ß)
+renders in Cormorant/Manrope, with no fallback font.
+
+## Ink atmosphere (background art)
+
+Calligraphic brush strokes, ink splashes and one lightning bolt, generated
+from a seed so the result is reproducible.
+
+- **Generator:** `pnpm backdrop:generate [--seed N]` (core in
+  `scripts/backdrop/core.mjs`, seeded mulberry32 RNG, no `Math.random`).
+  - Strokes sweep a flat rectangular nib at a fixed 35–45° angle along Bézier
+    centrelines, so thick/thin follows the stroke direction like a broad-edge
+    pen. Rough edges and dry-brush bristle tails are baked into the geometry.
+    Each step is a convex hull; all hulls are one `<path>` with nonzero fill.
+  - Splashes: a noisy main blob with spikes thrown mostly in one direction,
+    satellite droplets, bead trails and specks.
+  - Lightning: midpoint displacement with 1–2 forks. Style A is a hairline,
+    B has a visible glow. The glow is stacked wide, faint `royal-light`
+    strokes, not a blur filter.
+  - Output: `public/backdrop/*.svg` (used as CSS masks, so colour comes from
+    tokens), `grain.webp` (pre-rendered film grain), and
+    `src/components/atmosphere/backdrop-manifest.json`. The script fails if
+    the total exceeds 150 KB (currently about 115 KB raw).
+- **Composition:** `src/components/atmosphere/composition.ts` (hand-placed
+  layers per variant, `home` / `inner`, fewer on narrow screens).
+- **Tuning:** `--backdrop-intensity` in `tokens.css` (0–1) scales every layer;
+  `HOME_LIGHTNING` in `Backdrop.tsx` picks A, B or none. Compare everything
+  on `/en/dev/backdrop`.
+- **Rules:** decorative only (`aria-hidden`, no pointer events). Palette
+  tokens only. Bone layers at ≤ 0.1 opacity and purples at ≤ 0.35 keep text
+  above AA (measured worst case 12.5:1). Motion is transform/opacity only:
+  desktop parallax via CSS scroll-driven animations (no JS), and one soft
+  2-pulse lightning flash per session. Both are off under
+  `prefers-reduced-motion`.
 
 ## Open questions for the rework
 
-- A vector (SVG) version with a transparent background would remove the
-  on-black restriction and shrink the file from 555 KB.
-- A simplified mark (monogram only, no wordmark) for favicon and sizes below
-  48 px.
+- A vector (SVG) logo and monogram with transparent backgrounds would remove
+  the on-black restriction and shrink the files (currently 555 KB + 203 KB).
+- A simplified mark for the favicon at 16–32 px (the TEMP monogram is busy at
+  that size).
