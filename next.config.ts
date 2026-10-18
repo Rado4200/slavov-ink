@@ -1,5 +1,7 @@
 import type { NextConfig } from "next";
 
+import { indexingEnabled } from "./src/lib/indexing";
+
 /**
  * Dev-only routes use the `page.dev.tsx` extension (currently /dev/type).
  * They exist in `next dev`, and in a build only with ENABLE_DEV_ROUTES=1
@@ -16,6 +18,11 @@ const nextConfig: NextConfig = {
     globalNotFound: true,
   },
   pageExtensions: includeDevRoutes ? ["tsx", "ts", "dev.tsx"] : ["tsx", "ts"],
+  // Until launch (SITE_INDEXING=on) every response says noindex, nofollow.
+  async headers() {
+    if (indexingEnabled) return [];
+    return [{ source: "/:path*", headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }] }];
+  },
   turbopack: {
     rules: {
       "*.css": {

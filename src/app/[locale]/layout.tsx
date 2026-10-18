@@ -8,6 +8,7 @@ import { SmoothScroll } from "@/components/motion/SmoothScroll";
 import { site } from "@/content/site";
 import { localeMeta, locales } from "@/i18n/config";
 import { getLocale, getMessages } from "@/i18n/messages";
+import { indexingEnabled } from "@/lib/indexing";
 import { getSiteUrl } from "@/lib/site-url";
 import { fontVariables } from "@/styles/fonts";
 
@@ -27,6 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: { default: site.name, template: `%s | ${site.name}` },
     description: m.common.description,
     applicationName: site.name,
+    robots: indexingEnabled ? { index: true, follow: true } : { index: false, follow: false },
     openGraph: {
       type: "website",
       siteName: site.name,
