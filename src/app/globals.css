@@ -82,6 +82,43 @@
   body {
     min-height: 100dvh;
     font-family: var(--font-sans);
+    overflow-wrap: break-word;
+  }
+
+  /* Long words (German compounds) hyphenate per <html lang>, and break as a last resort. */
+  :where(h1, h2, h3, h4, p, li, dd, figcaption, blockquote) {
+    hyphens: auto;
+    overflow-wrap: anywhere;
+  }
+
+  /* No-JS: reveal-on-scroll content must stay visible. */
+  @media (scripting: none) {
+    [data-reveal] {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  }
+
+  /* Lenis (from lenis/dist/lenis.css, plus native smooth scrolling off while it runs). */
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+
+  html.lenis {
+    scroll-behavior: auto;
+  }
+
+  .lenis:not(.lenis-autoToggle).lenis-stopped {
+    overflow: clip;
+  }
+
+  .lenis [data-lenis-prevent] {
+    overscroll-behavior: contain;
+  }
+
+  .lenis.lenis-smooth iframe {
+    pointer-events: none;
   }
 
   ::selection {
