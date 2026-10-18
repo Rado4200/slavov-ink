@@ -54,7 +54,11 @@
   /* Gradients (purple to black only) */
   --gradient-veil: radial-gradient(ellipse at 50% 0%, var(--violet-deep) 0%, var(--ink) 70%);
 
-  /* Z-index layers */
+  /* Atmosphere (background art): one knob scales every layer opacity, 0 to 1 */
+  --backdrop-intensity: 1;
+
+  /* Z-index layers (backdrop is -1 inside an isolated page wrapper) */
+  --z-backdrop: -1;
   --z-base: 0;
   --z-raised: 10;
   --z-header: 40;

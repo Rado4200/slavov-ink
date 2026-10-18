@@ -1,0 +1,115 @@
+/*
+ * Ink atmosphere. Static art, transform/opacity animation only, no filters.
+ * Sizing rules use a container query, so the /dev/backdrop preview frame
+ * behaves like a real viewport of the same width.
+ */
+.backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-backdrop);
+  overflow: hidden;
+  pointer-events: none;
+  contain: paint;
+  container-type: inline-size;
+}
+
+.backdrop-layer {
+  position: absolute;
+  display: block;
+  opacity: calc(var(--layer-opacity) * var(--backdrop-intensity));
+}
+
+.backdrop-layer[data-art="mask"] {
+  background-color: currentColor;
+  mask-size: 100% 100%;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+}
+
+.backdrop-layer > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* One bolt, off-centre behind the hero; resting opacity, flashes once. */
+.backdrop-bolt {
+  --layer-depth: 0.2;
+  position: absolute;
+  top: 1%;
+  right: 7%;
+  height: min(78%, 560px);
+  opacity: var(--backdrop-intensity);
+}
+
+.backdrop-bolt > svg {
+  --bolt-rest: 0.6;
+  display: block;
+  height: 100%;
+  width: auto;
+  opacity: var(--bolt-rest);
+}
+
+@container (max-width: 767px) {
+  .backdrop-layer[data-desktop-only] {
+    display: none;
+  }
+
+  .backdrop-bolt {
+    right: -2%;
+    top: 0;
+    height: min(46%, 300px);
+  }
+
+  .backdrop-bolt > svg {
+    --bolt-rest: 0.45;
+  }
+}
+
+/* Desktop parallax: CSS scroll-driven animation (zero JS), translate only. */
+@supports (animation-timeline: scroll()) {
+  @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+    .backdrop-layer,
+    .backdrop-bolt {
+      animation: backdrop-drift linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 100vh;
+    }
+  }
+}
+
+@keyframes backdrop-drift {
+  to {
+    translate: 0 calc(var(--layer-depth, 0.3) * -140px);
+  }
+}
+
+/* Two soft pulses over 600ms (well under 3 flashes/second, WCAG 2.3.1). */
+.backdrop-bolt > svg[data-flash] {
+  animation: bolt-flash 600ms ease-out 1 both;
+}
+
+@keyframes bolt-flash {
+  0% {
+    opacity: var(--bolt-rest);
+  }
+  18% {
+    opacity: 1;
+  }
+  40% {
+    opacity: var(--bolt-rest);
+  }
+  62% {
+    opacity: 0.95;
+  }
+  100% {
+    opacity: var(--bolt-rest);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .backdrop-bolt > svg[data-flash] {
+    animation: none;
+  }
+}
