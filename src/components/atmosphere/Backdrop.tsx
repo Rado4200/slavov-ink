@@ -1,50 +1,46 @@
+import type { CSSProperties } from "react";
+
 import manifest from "@/components/atmosphere/backdrop-manifest.json";
-import type { LightningStyle } from "../../../scripts/backdrop/core.mjs";
-import { BackdropView, BOLT_ID } from "@/components/atmosphere/BackdropView";
-import type { LayerArt } from "@/components/atmosphere/BackdropView";
-import { BoltFlash } from "@/components/atmosphere/BoltFlash";
-import { compositions } from "@/components/atmosphere/composition";
-import type { ArtRef, BackdropVariant } from "@/components/atmosphere/composition";
+import { BACKDROP_LAYERS, TILES_PER_ROUTE } from "@/components/atmosphere/config";
+import type { BackdropRoute } from "@/components/atmosphere/config";
 
-/** Lightning look for the home hero: "A" hairline, "B" bold glow, null for none. */
-const HOME_LIGHTNING: LightningStyle | null = "A";
+import "./backdrop.css";
 
-function artFor(ref: ArtRef): LayerArt {
-  const entry =
-    ref.type === "stroke"
-      ? manifest.strokes.find((s) => s.kind === ref.kind)
-      : manifest.splashes[ref.index];
-  if (!entry) throw new Error(`Backdrop art missing from manifest: ${JSON.stringify(ref)}`);
-  return { kind: "mask", url: `/backdrop/${entry.file}`, width: entry.width, height: entry.height };
-}
+type CSSVars = CSSProperties & Record<`--${string}`, string>;
 
-type BackdropProps = {
-  variant: BackdropVariant;
-};
+const maskUrl = (url: string | null) => (url ? `url(${url})` : "none");
 
 /**
- * Decorative ink atmosphere behind a page section (place it as the first child
- * of a `relative isolate` wrapper). Server-rendered static art; the only JS is
- * the tiny once-per-session lightning flash on the home variant.
+ * Decorative ink atmosphere covering the whole document (main + footer).
+ * Rendered as the first child of a page; it positions itself against the
+ * layout's `relative isolate` wrapper. Zero JS: every tile layer is a CSS mask
+ * (desktop tile on landscape screens, mobile tile on portrait) over a palette
+ * token color, so it is never an LCP candidate and loads at image priority.
  */
-export function Backdrop({ variant }: BackdropProps) {
-  const layers = compositions[variant].map((spec) => ({ spec, art: artFor(spec.art) }));
-  const style = variant === "home" ? HOME_LIGHTNING : null;
-  const bolt = style
-    ? {
-        width: manifest.lightning.width,
-        height: manifest.lightning.height,
-        layers: manifest.lightning.styles[style].map((layer) => ({
-          ...layer,
-          color: layer.color as "bone" | "royal-light",
-        })),
-      }
-    : null;
-
+export function Backdrop({ route }: { route: BackdropRoute }) {
+  const sections = manifest.routes[route];
   return (
-    <>
-      <BackdropView layers={layers} bolt={bolt} />
-      {bolt ? <BoltFlash targetId={BOLT_ID} /> : null}
-    </>
+    <div aria-hidden="true" className="bd">
+      {Array.from({ length: TILES_PER_ROUTE[route] }, (_, index) => {
+        const section = sections[index % sections.length];
+        const mirrored = Math.floor(index / sections.length) % 2 === 1;
+        return (
+          <div
+            key={index}
+            className="bd-tile"
+            data-mirror={mirrored ? "" : undefined}
+            style={{ top: `${index * 100}vh` }}
+          >
+            {BACKDROP_LAYERS.map((layer) => {
+              const desktop = section.desktop[layer];
+              const mobile = section.mobile[layer];
+              if (!desktop && !mobile) return null;
+              const style: CSSVars = { "--bd-d": maskUrl(desktop), "--bd-m": maskUrl(mobile) };
+              return <div key={layer} className="bd-layer" data-layer={layer} style={style} />;
+            })}
+          </div>
+        );
+      })}
+    </div>
   );
 }

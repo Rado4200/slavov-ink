@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 
+import { LightningStorm } from "@/components/atmosphere/LightningStorm";
 import { GrainOverlay } from "@/components/brand/GrainOverlay";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
@@ -50,13 +51,18 @@ export default async function LocaleLayout({ children }: LayoutProps<"/[locale]"
 
   return (
     <html lang={locale} className={fontVariables}>
-      <body className="flex min-h-dvh flex-col bg-ink text-silver">
+      {/* No body background: <html> paints the ink, so the fixed storm layer shows through. */}
+      <body className="flex min-h-dvh flex-col text-silver">
         <SkipLink targetId={MAIN_ID} label={m.a11y.skipToContent} />
         <Header />
-        <main id={MAIN_ID} tabIndex={-1} className="flex-1 outline-none">
-          {children}
-        </main>
-        <Footer />
+        <LightningStorm />
+        {/* Containing block for each page Backdrop, so the art spans main and footer. */}
+        <div className="relative isolate flex flex-1 flex-col">
+          <main id={MAIN_ID} tabIndex={-1} className="flex-1 outline-none">
+            {children}
+          </main>
+          <Footer />
+        </div>
         <GrainOverlay />
         <SmoothScroll />
       </body>

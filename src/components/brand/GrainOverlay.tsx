@@ -17,7 +17,7 @@ export function GrainOverlay({ opacity = 0.05 }: GrainOverlayProps) {
       aria-hidden="true"
       className="pointer-events-none fixed inset-0 z-(--z-grain)"
       style={{
-        backgroundImage: `url(/backdrop/${manifest.grain.file})`,
+        backgroundImage: `url(${manifest.grain.file})`,
         backgroundSize: `${size}px ${size}px`,
         opacity,
       }}

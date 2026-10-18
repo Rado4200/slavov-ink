@@ -37,7 +37,7 @@ export async function Footer() {
   const year = await currentYear();
 
   return (
-    <footer id="contact" className="mt-section border-t border-ink-line pt-16 pb-10">
+    <footer id="contact" className="mt-section border-t border-ink-line bg-ink/80 pt-16 pb-10">
       <Container>
         <Reveal className="grid gap-12 md:grid-cols-[auto_1fr_1fr_1fr] md:gap-16">
           <Logo size="md" />

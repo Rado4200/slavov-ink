@@ -19,9 +19,9 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function AboutPage() {
   const m = await getMessages();
   return (
-    <div className="relative isolate">
-      <Backdrop variant="inner" />
+    <>
+      <Backdrop route="about" />
       <PageHero heading={m.about.heading} intro={m.about.intro} />
-    </div>
+    </>
   );
 }
