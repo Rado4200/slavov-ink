@@ -29,10 +29,13 @@ function shuffled(count: number) {
 
 /** Starts the storm inside the server-rendered .storm root; returns stop(). */
 export function startStorm(root: HTMLElement, cfg: StormConfig): () => void {
+  // The whole <svg> is animated (composited opacity), so the masked bolt is
+  // rasterized once per strike instead of on every animation frame.
+  const svg = root.querySelector<SVGSVGElement>(".storm-svg");
   const bolt = root.querySelector<SVGGElement>(".storm-bolt");
   const cut = root.querySelector<SVGPathElement>(".storm-cut");
   const wash = root.querySelector<HTMLElement>(".storm-wash");
-  if (!bolt || !cut || !wash) return () => {};
+  if (!svg || !bolt || !cut || !wash) return () => {};
   const paths = Array.from(bolt.querySelectorAll("path"));
   const slow = window.matchMedia("(max-width: 767px), (pointer: coarse)").matches
     ? cfg.mobileFactor
@@ -57,7 +60,7 @@ export function startStorm(root: HTMLElement, cfg: StormConfig): () => void {
   };
 
   // Text boxes near the bolt become cut-outs in its mask (bolt dims behind text).
-  const shields = (box: DOMRect) => {
+  const shields = (box: { left: number; right: number; top: number; bottom: number }) => {
     const p = cfg.shieldPadding;
     let d = "";
     for (const el of document.querySelectorAll(cfg.shieldSelector)) {
@@ -87,6 +90,11 @@ export function startStorm(root: HTMLElement, cfg: StormConfig): () => void {
     const x = ((nextSlot() + 0.5) / cfg.slots + (Math.random() - 0.5) * 0.04) * window.innerWidth;
     const mirror = Math.random() < 0.5 ? -1 : 1;
     const rotate = (Math.random() * 2 - 1) * cfg.maxRotation;
+    // Read layout before any writes (no forced reflow): the bolt box comes from
+    // its geometry, widened for the rotation.
+    const height = b.length * window.innerHeight;
+    const reach = (b.width * scale) / 2 + height * Math.sin((cfg.maxRotation * Math.PI) / 180);
+    cut.setAttribute("d", shields({ left: x - reach, right: x + reach, top: 0, bottom: height }));
     bolt.setAttribute(
       "transform",
       `translate(${x} 0) rotate(${rotate}) scale(${mirror * scale} ${scale}) translate(${-b.width / 2} 0)`,
@@ -108,7 +116,6 @@ export function startStorm(root: HTMLElement, cfg: StormConfig): () => void {
       path.setAttribute("stroke-width", String(layer.width));
       path.setAttribute("stroke-opacity", String(layer.opacity));
     });
-    cut.setAttribute("d", shields(bolt.getBoundingClientRect()));
 
     const duration = cfg.secondPulseMs + rand(cfg.fadeMs);
     const at = (ms: number) => ms / duration;
@@ -119,7 +126,7 @@ export function startStorm(root: HTMLElement, cfg: StormConfig): () => void {
       { opacity: peak * cfg.secondPulse, offset: at(cfg.secondPulseMs) },
       { opacity: 0 },
     ];
-    bolt.animate(pulse(cfg.intensity), { duration, easing: "ease-out" });
+    svg.animate(pulse(cfg.intensity), { duration, easing: "ease-out" });
     wash.animate(pulse(cfg.washAlpha), { duration, easing: "ease-out" });
   };
 

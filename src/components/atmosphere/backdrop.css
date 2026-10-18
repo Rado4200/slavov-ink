@@ -101,9 +101,11 @@
   display: block;
   width: 100%;
   height: 100%;
+  /* Own compositor layer: strikes fade without repainting the masked bolt. */
+  will-change: opacity;
 }
 
-.storm-bolt,
+.storm-svg,
 .storm-wash {
   opacity: 0;
 }
