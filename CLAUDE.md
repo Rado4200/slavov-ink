@@ -60,10 +60,40 @@ updates the site by only adding or removing files in Drive. Zero code edits for 
 - No `any`, no `@ts-ignore`, no unused code, no console noise.
 
 ## Workflow rules
-- Before reporting done, ALWAYS run: `pnpm lint && pnpm typecheck && pnpm build`.
+- Before reporting done, ALWAYS run: `pnpm lint && pnpm typecheck && pnpm i18n:check && pnpm build`.
 - Small, logical commits with conventional messages (`feat:`, `fix:`, `chore:`...).
 - When a requirement is ambiguous, state your assumption briefly and proceed;
   list assumptions at the end of your report.
 - End every task with: what was built, files touched, how to verify, open questions.
 - Do not invent business facts (address, prices, phone, bio). Use clearly marked
   placeholders in `src/content/` and list them in the report.
+
+## i18n
+- Locales: `bg`, `en`, `es`, `de`. All user-visible text lives in message files
+  (`src/messages/<locale>/<namespace>.json`), never in components.
+- English is the schema source of truth; every other locale must match its keys
+  (enforced by `pnpm typecheck` and `pnpm i18n:check`).
+- Language-neutral data (URLs, phone, coordinates) stays in `src/content/site.ts`.
+- Copy placeholders (`TODO:`) for user-visible text live in `src/messages/`.
+
+## Fonts
+- Subsets: latin + latin-ext + cyrillic.
+- Pirata One only for text identical in every language (brand name, numerals,
+  decorative glyphs). Headings use Cormorant, body uses Manrope.
+
+## Atmosphere
+- Background art is decorative only (`aria-hidden`, no pointer events), uses palette
+  tokens only, never lowers text contrast below WCAG AA, and prefers static assets
+  over runtime effects.
+
+## Contact (Phase 3 preview)
+- EmailJS contact form on the homepage, WhatsApp Business link (`wa.me` with a
+  localized prefilled message), Instagram and Facebook links.
+- All behind abstractions so providers can be swapped.
+
+## Next.js 16 notes
+- Cache Components is on. Use `"use cache"` / `cacheLife` / `cacheTag` for data caching
+  (relevant for the Drive integration), not legacy `export const revalidate`.
+- Middleware is named `proxy.ts` in Next 16.
+- Always check the current Next docs bundled in `node_modules/next/dist/docs` or the
+  official docs before using an API.
