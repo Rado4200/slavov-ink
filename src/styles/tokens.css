@@ -1,0 +1,74 @@
+/*
+ * Slavov Ink design tokens. Single source of truth for raw values.
+ * Colors are sampled from public/brand/logo-current.png by
+ * scripts/extract-brand-colors.mjs (see docs/brand.md).
+ * Tailwind utilities are mapped from these variables in src/app/globals.css.
+ * Dark only: there is no light theme.
+ */
+:root {
+  color-scheme: dark;
+
+  /* Color: base */
+  --ink: #000000; /* sampled background #000001 */
+  --ink-raised: #0a0a0a; /* neutral lift for cards/surfaces (no hue) */
+  --ink-line: #1a1a1a; /* hairline borders on ink */
+
+  /* Color: purple family (sampled, hue 275) */
+  --royal: #6904b4; /* primary accent: brightest dominant purple */
+  --royal-deep: #51038b; /* mid purple, offset echo / pressed states */
+  --violet: #39055e; /* shadow violet, gradients */
+  --violet-deep: #1e0134; /* darkest dominant purple, subtle surfaces */
+
+  /* Color: derived tint (same hue 275), for text/focus on dark (5.51:1 on ink) */
+  --royal-light: #b451fb;
+
+  /* Color: neutrals (sampled grunge white/grey range) */
+  --bone: #fcfcfc; /* p90 of the white areas */
+  --silver: #cfcfd0; /* median of the white areas */
+  --ash: #959595; /* p10 of the white areas (7.01:1 on ink) */
+
+  /* Spacing: fluid layout spacing on top of Tailwind's 0.25rem scale */
+  --space-gutter: clamp(1rem, 0.6rem + 2vw, 2.5rem);
+  --space-section: clamp(4rem, 2.5rem + 7vw, 10rem);
+  --space-header: 4.5rem;
+  --container-max: 90rem;
+
+  /* Radii: sharp by default, brand is angular */
+  --corner-none: 0;
+  --corner-sm: 2px;
+  --corner-md: 4px;
+  --corner-lg: 8px;
+
+  /* Shadows */
+  --elevation-soft: 0 10px 30px -10px rgb(0 0 0 / 0.8);
+  --elevation-raised: 0 24px 60px -20px rgb(0 0 0 / 0.9), 0 0 0 1px var(--ink-line);
+  --elevation-echo: 6px 6px 0 0 var(--royal-deep); /* logo's offset purple echo */
+
+  /* Glow (purple) */
+  --glow: 0 0 24px -4px rgb(105 4 180 / 0.55);
+  --glow-lg: 0 0 60px -10px rgb(105 4 180 / 0.6), 0 0 120px -30px rgb(57 5 94 / 0.8);
+  --glow-drop: 0 0 18px rgb(105 4 180 / 0.55); /* filter: follows image shape */
+  --text-echo: 0.06em 0.06em 0 var(--royal-deep); /* text offset echo, like "INK." */
+  --text-glow: 0 0 18px rgb(105 4 180 / 0.65);
+
+  /* Gradients (purple to black only) */
+  --gradient-veil: radial-gradient(ellipse at 50% 0%, var(--violet-deep) 0%, var(--ink) 70%);
+
+  /* Z-index layers */
+  --z-base: 0;
+  --z-raised: 10;
+  --z-header: 40;
+  --z-overlay: 50;
+  --z-modal: 60;
+  --z-grain: 70;
+  --z-skip: 80;
+
+  /* Motion */
+  --curve-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --curve-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --curve-in-out-quint: cubic-bezier(0.83, 0, 0.17, 1);
+  --dur-fast: 150ms;
+  --dur-base: 300ms;
+  --dur-slow: 600ms;
+  --dur-slower: 1000ms;
+}

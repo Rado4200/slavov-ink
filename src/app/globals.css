@@ -1,0 +1,121 @@
+@import "tailwindcss";
+@import "../styles/tokens.css";
+
+/*
+ * Tailwind theme mapped from design tokens (src/styles/tokens.css).
+ * Default colors are cleared so only brand hues can be used.
+ */
+@theme inline {
+  --color-*: initial;
+  --color-ink: var(--ink);
+  --color-ink-raised: var(--ink-raised);
+  --color-ink-line: var(--ink-line);
+  --color-royal: var(--royal);
+  --color-royal-deep: var(--royal-deep);
+  --color-royal-light: var(--royal-light);
+  --color-violet: var(--violet);
+  --color-violet-deep: var(--violet-deep);
+  --color-bone: var(--bone);
+  --color-silver: var(--silver);
+  --color-ash: var(--ash);
+
+  --font-display: var(--font-display-face), "Times New Roman", serif;
+  --font-heading: var(--font-heading-face), Georgia, serif;
+  --font-sans: var(--font-body-face), ui-sans-serif, system-ui, sans-serif;
+
+  --spacing-gutter: var(--space-gutter);
+  --spacing-section: var(--space-section);
+  --spacing-header: var(--space-header);
+  --container-site: var(--container-max);
+
+  --radius-none: var(--corner-none);
+  --radius-sm: var(--corner-sm);
+  --radius-md: var(--corner-md);
+  --radius-lg: var(--corner-lg);
+
+  --shadow-soft: var(--elevation-soft);
+  --shadow-raised: var(--elevation-raised);
+  --shadow-echo: var(--elevation-echo);
+  --shadow-glow: var(--glow);
+  --shadow-glow-lg: var(--glow-lg);
+
+  --drop-shadow-glow: var(--glow-drop);
+
+  --text-shadow-echo: var(--text-echo);
+  --text-shadow-glow: var(--text-glow);
+
+  --ease-out-expo: var(--curve-out-expo);
+  --ease-out-quart: var(--curve-out-quart);
+  --ease-in-out-quint: var(--curve-in-out-quint);
+}
+
+@utility bg-veil {
+  background-image: var(--gradient-veil);
+}
+
+@utility duration-fast {
+  transition-duration: var(--dur-fast);
+}
+
+@utility duration-base {
+  transition-duration: var(--dur-base);
+}
+
+@utility duration-slow {
+  transition-duration: var(--dur-slow);
+}
+
+@layer base {
+  html {
+    background-color: var(--ink);
+    color: var(--silver);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Lock page scroll while a modal dialog (mobile menu) is open. */
+  html:has(dialog[open]) {
+    overflow: hidden;
+  }
+
+  body {
+    min-height: 100dvh;
+    font-family: var(--font-sans);
+  }
+
+  ::selection {
+    background-color: var(--royal);
+    color: var(--bone);
+  }
+
+  /* Fixed outline color, so color transitions never fade the focus ring in from white. */
+  *,
+  ::before,
+  ::after {
+    outline-color: var(--royal-light);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--royal-light);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  /* Reduced motion: kill transforms/large motion, keep short opacity fades. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 1ms !important;
+      animation-iteration-count: 1 !important;
+      scroll-behavior: auto !important;
+      transition-property: opacity, color, background-color, border-color !important;
+    }
+  }
+}
