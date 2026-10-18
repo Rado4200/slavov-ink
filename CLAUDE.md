@@ -1,7 +1,7 @@
 # CLAUDE.md — Slavov Ink
 
 Portfolio website for **Slavov Ink**, a tattoo artist's studio brand.
-The brand name is **Slavov Ink**. Never use "Hypnotize Ink" anywhere (code, copy, metadata, comments).
+The only brand name is **Slavov Ink**. Never use any former or alternative studio name.
 
 ## Mission
 A premium, dark, smooth, elite website. Three pages: Home, About, Portfolio.
