@@ -108,48 +108,58 @@
 
 /* ---- Draw-on long diagonals (Home, About; first view only) --------------- */
 
+/*
+ * At rest both elements are untransformed: the stroke is a plain masked layer.
+ * Only while drawing (fill: backwards, so also during the stagger delay) is
+ * the window rotated, scaled and masked with a soft leading edge, and the
+ * stroke counter-transformed. The draw's end state equals the rest state, so
+ * nothing jumps, and no large rotated layers stay alive after the draw.
+ */
 .bd-draw {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  rotate: var(--a);
-  scale: 2.8;
-  translate: var(--w-to);
-  /* Soft leading edge, in the window's own (stroke-aligned) frame. */
-  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 3cqw), transparent);
-  mask-image: linear-gradient(to right, #000 calc(100% - 3cqw), transparent);
 }
 
 .bd-hero {
   -webkit-mask-image: var(--bd-mask);
   mask-image: var(--bd-mask);
-  rotate: calc(var(--a) * -1);
-  scale: calc(1 / 2.8);
-  translate: var(--i-to) 0;
 }
 
 .fx-decode[data-ready] .bd-draw {
-  animation: bd-draw-window var(--draw-ms) var(--ease-main) var(--draw-delay) both;
+  animation: bd-draw-window var(--draw-ms) var(--ease-main) var(--draw-delay) backwards;
 }
 
 .fx-decode[data-ready] .bd-hero {
-  animation: bd-draw-stroke var(--draw-ms) var(--ease-main) var(--draw-delay) both;
+  animation: bd-draw-stroke var(--draw-ms) var(--ease-main) var(--draw-delay) backwards;
 }
 
 @keyframes bd-draw-window {
   from {
+    rotate: var(--a);
+    scale: 2.8;
     translate: var(--w-from);
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 3cqw), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 3cqw), transparent);
   }
   to {
+    rotate: var(--a);
+    scale: 2.8;
     translate: var(--w-to);
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 3cqw), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 3cqw), transparent);
   }
 }
 
 @keyframes bd-draw-stroke {
   from {
+    rotate: calc(var(--a) * -1);
+    scale: calc(1 / 2.8);
     translate: var(--i-from) 0;
   }
   to {
+    rotate: calc(var(--a) * -1);
+    scale: calc(1 / 2.8);
     translate: var(--i-to) 0;
   }
 }
