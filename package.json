@@ -17,7 +17,9 @@
     "brand:colors": "node scripts/extract-brand-colors.mjs",
     "brand:icons": "node scripts/generate-icons.mjs",
     "backdrop:generate": "node scripts/generate-backdrop.mjs",
-    "i18n:check": "node scripts/i18n-check.mjs"
+    "i18n:check": "node scripts/i18n-check.mjs",
+    "prepare": "node scripts/setup-hooks.mjs",
+    "deploy:verify": "node scripts/verify-deploy.mjs"
   },
   "dependencies": {
     "lenis": "1.3.26",
