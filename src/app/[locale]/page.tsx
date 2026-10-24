@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { Backdrop } from "@/components/atmosphere/Backdrop";
+import { Backdrop, ContactBackdrop } from "@/components/atmosphere/Backdrop";
 import { Logo } from "@/components/brand/Logo";
 import { ContactSection } from "@/components/contact/ContactSection";
 import { PageHero } from "@/components/ui/PageHero";
@@ -35,7 +35,7 @@ export default async function HomePage() {
         }
         intro={m.home.intro}
       />
-      <ContactSection />
+      <ContactSection backdrop={<ContactBackdrop />} />
     </>
   );
 }

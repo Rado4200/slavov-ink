@@ -1,10 +1,11 @@
 /*
- * Ink atmosphere v2 (see docs/atmosphere.md). Static masks, transform-only
- * parallax, no filters. Colors are palette tokens; --backdrop-intensity
- * scales everything.
+ * Ink atmosphere v3 (see docs/atmosphere.md). Static AVIF masks over palette
+ * tokens; animation is transform/opacity only (draw-on: translate only).
+ * Reduced motion turns every animation off unless html[data-effects="full"]
+ * (the ?effects=full review aid).
  */
 
-/* ---- Tiles ------------------------------------------------------------- */
+/* ---- Section tiles ----------------------------------------------------- */
 
 .bd {
   position: absolute;
@@ -18,71 +19,207 @@
   position: absolute;
   left: 0;
   right: 0;
-  height: 100vh;
+  height: 100lvh;
+  container-type: size;
+  contain: paint;
   /* Off-screen tiles skip paint, so their masks are not fetched until needed. */
   content-visibility: auto;
-  contain-intrinsic-size: auto 100vh;
-  contain: paint;
+  contain-intrinsic-size: auto 100lvh;
 }
 
 .bd-tile[data-mirror] {
   scale: -1 1;
 }
 
-.bd-layer {
-  --depth: 1;
+.bd-layer,
+.bd-hero,
+.bd-dust-layer {
   position: absolute;
-  inset: -4vh 0;
+  inset: 0;
   opacity: var(--backdrop-intensity);
-  mask-image: var(--bd-d);
-  mask-size: cover;
-  mask-position: center;
-  mask-repeat: no-repeat;
   -webkit-mask-image: var(--bd-d);
+  mask-image: var(--bd-d);
   -webkit-mask-size: cover;
+  mask-size: cover;
   -webkit-mask-position: center;
+  mask-position: center;
   -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
 }
 
-.bd-layer[data-layer="royal"] {
+[data-layer="royal"] {
   --depth: 0.35;
   background-color: var(--royal);
 }
 
-.bd-layer[data-layer="royal-light"] {
+[data-layer="royal-light"] {
   --depth: 0.65;
   background-color: var(--royal-light);
 }
 
-.bd-layer[data-layer="bone"] {
+[data-layer="bone"] {
+  --depth: 1;
   background-color: var(--bone);
 }
 
-/* Portrait screens use the tall mobile tile. */
-@media (orientation: portrait) {
-  .bd-layer {
-    mask-image: var(--bd-m);
-    -webkit-mask-image: var(--bd-m);
+/* A layer missing for one variant must not render there (mask: none = solid fill). */
+@media (orientation: landscape) {
+  .bd-layer:not([data-d]) {
+    display: none;
   }
 }
 
-/* Subtle desktop parallax: CSS scroll-driven, layers drift at different depths. */
+@media (orientation: portrait) {
+  .bd-layer:not([data-m]) {
+    display: none;
+  }
+}
+
+/* Portrait screens use the tall mobile tiles. */
+@media (orientation: portrait) {
+  .bd-layer,
+  .bd-dust-layer {
+    -webkit-mask-image: var(--bd-m);
+    mask-image: var(--bd-m);
+  }
+
+  .bd-draw[data-variant="desktop"] {
+    display: none;
+  }
+}
+
+@media (orientation: landscape) {
+  .bd-draw[data-variant="mobile"] {
+    display: none;
+  }
+}
+
+/* Fade in over 1200 ms once the masks are decoded (Effects adds data-ready). */
+@media (scripting: enabled) {
+  .fx-decode:not([data-ready]) :is(.bd-layer, .bd-dust-layer, .bd-hero) {
+    opacity: 0;
+  }
+}
+
+.bd-layer,
+.bd-dust-layer {
+  transition: opacity var(--dur-slower) var(--ease-main);
+}
+
+/* ---- Draw-on long diagonals (Home, About; first view only) --------------- */
+
+.bd-draw {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  rotate: var(--a);
+  scale: 2.8;
+  translate: var(--w-to);
+  /* Soft leading edge, in the window's own (stroke-aligned) frame. */
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 3cqw), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 3cqw), transparent);
+}
+
+.bd-hero {
+  -webkit-mask-image: var(--bd-mask);
+  mask-image: var(--bd-mask);
+  rotate: calc(var(--a) * -1);
+  scale: calc(1 / 2.8);
+  translate: var(--i-to) 0;
+}
+
+.fx-decode[data-ready] .bd-draw {
+  animation: bd-draw-window var(--draw-ms) var(--ease-main) var(--draw-delay) both;
+}
+
+.fx-decode[data-ready] .bd-hero {
+  animation: bd-draw-stroke var(--draw-ms) var(--ease-main) var(--draw-delay) both;
+}
+
+@keyframes bd-draw-window {
+  from {
+    translate: var(--w-from);
+  }
+  to {
+    translate: var(--w-to);
+  }
+}
+
+@keyframes bd-draw-stroke {
+  from {
+    translate: var(--i-from) 0;
+  }
+  to {
+    translate: var(--i-to) 0;
+  }
+}
+
+/* ---- Desktop parallax (CSS scroll-driven, off on phones) ----------------- */
+
 @supports (animation-timeline: view()) {
-  @media (orientation: landscape) and (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+  @media (orientation: landscape) and (min-width: 768px) {
     .bd-layer {
-      animation: bd-drift linear both;
+      animation: bd-parallax linear both;
       animation-timeline: view();
       animation-range: cover;
     }
   }
 }
 
-@keyframes bd-drift {
+@keyframes bd-parallax {
   from {
-    translate: 0 calc(var(--depth) * 3vh);
+    translate: 0 calc(var(--depth) * 2.5lvh);
   }
   to {
-    translate: 0 calc(var(--depth) * -3vh);
+    translate: 0 calc(var(--depth) * -2.5lvh);
+  }
+}
+
+/* ---- Contact tile (behind the glass panel) ------------------------------- */
+
+.bd-contact {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-backdrop);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* ---- Dust: fixed viewport layer, two depths drifting very slowly -------- */
+
+.bd-dust {
+  position: fixed;
+  inset: 0;
+  height: 100lvh;
+  z-index: var(--z-backdrop);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.bd-dust-far,
+.bd-dust-near {
+  position: absolute;
+  inset: -16px;
+  will-change: transform;
+}
+
+.bd-dust-far {
+  animation: bd-drift-far 110s linear infinite alternate;
+}
+
+.bd-dust-near {
+  animation: bd-drift-near 90s linear infinite alternate;
+}
+
+@keyframes bd-drift-far {
+  to {
+    translate: -10px 8px;
+  }
+}
+
+@keyframes bd-drift-near {
+  to {
+    translate: 14px -10px;
   }
 }
 
@@ -91,33 +228,37 @@
 .storm {
   position: fixed;
   inset: 0;
+  height: 100lvh;
   z-index: var(--z-backdrop);
   pointer-events: none;
   overflow: hidden;
   contain: strict;
 }
 
-.storm-svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-  /* Own compositor layer: strikes fade without repainting the masked bolt. */
-  will-change: opacity;
-}
-
 .storm-svg,
-.storm-wash {
-  opacity: 0;
-}
-
 .storm-wash {
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  /* Own compositor layers: strikes fade without repainting the bolt. */
+  will-change: opacity;
+}
+
+.storm-wash {
   background-color: var(--royal);
 }
 
+/* ---- Reduced motion: no draw-on, parallax, drift or fades --------------- */
+
 @media (prefers-reduced-motion: reduce) {
-  .storm {
-    display: none;
+  /* !important: must beat the higher-specificity [data-ready] animation rules. */
+  html:not([data-effects="full"]) :is(.bd-draw, .bd-hero, .bd-layer, .bd-dust-far, .bd-dust-near) {
+    animation: none !important;
+  }
+
+  html:not([data-effects="full"]) :is(.bd-layer, .bd-dust-layer) {
+    transition: none !important;
   }
 }

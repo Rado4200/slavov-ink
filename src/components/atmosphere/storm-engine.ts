@@ -1,11 +1,11 @@
 import type { StormConfig } from "@/components/atmosphere/storm.config";
 
 /*
- * Lightning storm engine. Loaded after idle by <LightningStorm>; imperative
- * Web Animations API, no React state per strike, no animation library.
+ * Lightning storm engine (loaded after idle by <LightningStorm>). Imperative
+ * Web Animations API on two composited <svg> layers (bright strike + purple
+ * afterglow); no React state per strike, no animation library.
  */
 
-type BoltLayer = { part: "all" | "main" | "forks"; width: number; color: string; opacity: number };
 type Bolt = {
   style: string;
   width: number;
@@ -14,157 +14,150 @@ type Bolt = {
   main: string;
   forks: string;
 };
-type StormData = { styles: Record<string, BoltLayer[]>; bolts: Bolt[] };
+type Layer = { part: string; width: number; phoneWidth?: number; color: string; opacity: number };
 
 const rand = ([min, max]: readonly [number, number]) => min + Math.random() * (max - min);
 
-function shuffled(count: number) {
-  const bag = Array.from({ length: count }, (_, i) => i);
-  for (let i = count - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [bag[i], bag[j]] = [bag[j], bag[i]];
-  }
-  return bag;
-}
-
-/** Starts the storm inside the server-rendered .storm root; returns stop(). */
-export function startStorm(root: HTMLElement, cfg: StormConfig): () => void {
-  // The whole <svg> is animated (composited opacity), so the masked bolt is
-  // rasterized once per strike instead of on every animation frame.
-  const svg = root.querySelector<SVGSVGElement>(".storm-svg");
-  const bolt = root.querySelector<SVGGElement>(".storm-bolt");
+export function startStorm(root: HTMLElement, cfg: StormConfig, gentle: boolean): () => void {
+  const [bright, glow] = Array.from(root.querySelectorAll<SVGSVGElement>(".storm-svg"));
   const cut = root.querySelector<SVGPathElement>(".storm-cut");
   const wash = root.querySelector<HTMLElement>(".storm-wash");
-  if (!svg || !bolt || !cut || !wash) return () => {};
-  const paths = Array.from(bolt.querySelectorAll("path"));
-  const slow = window.matchMedia("(max-width: 767px), (pointer: coarse)").matches
-    ? cfg.mobileFactor
-    : 1;
-  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
-
-  let data: StormData | undefined;
+  if (!bright || !glow || !cut || !wash) return () => {};
+  const phone = matchMedia("(max-width: 767px), (pointer: coarse)").matches;
+  const slow = phone ? cfg.phoneFactor : 1;
+  let bolts: Bolt[] = [];
   let timer = 0;
   let bag: number[] = [];
   let lastSlot = -9;
   let lastBolt = -1;
 
-  // Shuffle bag over the slots, never the same or an adjacent slot twice in a row.
+  // Shuffle bag over the slots; never the same or an adjacent slot twice in a row.
   const nextSlot = () => {
-    let index = bag.findIndex((slot) => Math.abs(slot - lastSlot) > 1);
-    if (index < 0) {
-      bag = shuffled(cfg.slots);
-      index = bag.findIndex((slot) => Math.abs(slot - lastSlot) > 1);
+    let i = bag.findIndex((s) => Math.abs(s - lastSlot) > 1);
+    if (i < 0) {
+      bag = Array.from({ length: cfg.slots }, (_, k) => k).sort(() => Math.random() - 0.5);
+      i = bag.findIndex((s) => Math.abs(s - lastSlot) > 1);
     }
-    lastSlot = bag.splice(index, 1)[0];
+    lastSlot = bag.splice(i, 1)[0];
     return lastSlot;
   };
 
-  // Text boxes near the bolt become cut-outs in its mask (bolt dims behind text).
-  const shields = (box: { left: number; right: number; top: number; bottom: number }) => {
+  // Body-text boxes inside the bolt's reach become dimmed areas of its mask.
+  const shields = (left: number, right: number, bottom: number) => {
     const p = cfg.shieldPadding;
     let d = "";
     for (const el of document.querySelectorAll(cfg.shieldSelector)) {
       const r = el.getBoundingClientRect();
-      if (
-        r.width === 0 ||
-        r.bottom < box.top ||
-        r.top > box.bottom ||
-        r.right < box.left ||
-        r.left > box.right
-      )
-        continue;
-      d += `M${r.left - p} ${r.top - p}h${r.width + 2 * p}v${r.height + 2 * p}h${-(r.width + 2 * p)}z`;
+      if (!r.width || r.bottom < 0 || r.top > bottom || r.right < left || r.left > right) continue;
+      d += `M${r.left - p} ${r.top - p}h${r.width + 2 * p}v${r.height + 2 * p}h${-r.width - 2 * p}z`;
     }
     return d;
   };
 
-  const strike = () => {
-    if (!data || document.hidden) return;
-    let pick = Math.floor(Math.random() * data.bolts.length);
-    if (pick === lastBolt) pick = (pick + 1) % data.bolts.length;
-    lastBolt = pick;
-    const b = data.bolts[pick];
-    const layers = data.styles[b.style] ?? [];
-
-    const scale = (b.length * window.innerHeight) / b.height;
-    const x = ((nextSlot() + 0.5) / cfg.slots + (Math.random() - 0.5) * 0.04) * window.innerWidth;
-    const mirror = Math.random() < 0.5 ? -1 : 1;
-    const rotate = (Math.random() * 2 - 1) * cfg.maxRotation;
-    // Read layout before any writes (no forced reflow): the bolt box comes from
-    // its geometry, widened for the rotation.
-    const height = b.length * window.innerHeight;
-    const reach = (b.width * scale) / 2 + height * Math.sin((cfg.maxRotation * Math.PI) / 180);
-    cut.setAttribute("d", shields({ left: x - reach, right: x + reach, top: 0, bottom: height }));
-    bolt.setAttribute(
-      "transform",
-      `translate(${x} 0) rotate(${rotate}) scale(${mirror * scale} ${scale}) translate(${-b.width / 2} 0)`,
-    );
-    paths.forEach((path, i) => {
-      const layer = layers[i];
+  const paint = (svg: SVGSVGElement, b: Bolt, layers: readonly Layer[], transform: string) => {
+    const group = svg.querySelector("g g");
+    if (!group) return;
+    group.setAttribute("transform", transform);
+    group.querySelectorAll("path").forEach((path, i) => {
+      const l = layers[i];
       path.setAttribute(
         "d",
-        !layer
-          ? ""
-          : layer.part === "main"
-            ? b.main
-            : layer.part === "forks"
-              ? b.forks
-              : b.main + b.forks,
+        !l ? "" : l.part === "main" ? b.main : l.part === "forks" ? b.forks : b.main + b.forks,
       );
-      if (!layer) return;
-      path.setAttribute("stroke", `var(--${layer.color})`);
-      path.setAttribute("stroke-width", String(layer.width));
-      path.setAttribute("stroke-opacity", String(layer.opacity));
+      if (!l) return;
+      path.setAttribute("stroke", `var(--${l.color})`);
+      path.setAttribute("stroke-width", String(phone && l.phoneWidth ? l.phoneWidth : l.width));
+      path.setAttribute("stroke-opacity", String(l.opacity));
     });
-
-    const duration = cfg.secondPulseMs + rand(cfg.fadeMs);
-    const at = (ms: number) => ms / duration;
-    const pulse = (peak: number): Keyframe[] => [
-      { opacity: 0 },
-      { opacity: peak, offset: at(cfg.riseMs) },
-      { opacity: peak * 0.25, offset: at(cfg.secondPulseMs * 0.55) },
-      { opacity: peak * cfg.secondPulse, offset: at(cfg.secondPulseMs) },
-      { opacity: 0 },
-    ];
-    svg.animate(pulse(cfg.intensity), { duration, easing: "ease-out" });
-    wash.animate(pulse(cfg.washAlpha), { duration, easing: "ease-out" });
   };
 
+  const strike = () => {
+    if (!bolts.length || document.hidden) return;
+    let pick = Math.floor(Math.random() * bolts.length);
+    if (pick === lastBolt) pick = (pick + 1) % bolts.length;
+    lastBolt = pick;
+    const b = bolts[pick];
+    const style = cfg.styles[b.style as keyof StormConfig["styles"]] ?? cfg.styles.bold;
+    const height = b.length * innerHeight;
+    const scale = height / b.height;
+    const x = ((nextSlot() + 0.5) / cfg.slots + (Math.random() - 0.5) * 0.04) * innerWidth;
+    const mirror = Math.random() < 0.5 ? -1 : 1;
+    const rotate = (Math.random() * 2 - 1) * cfg.maxRotation;
+    const reach = (b.width * scale) / 2 + height * Math.sin((cfg.maxRotation * Math.PI) / 180);
+    // Read layout first (no forced reflow), then write.
+    cut.setAttribute("d", shields(x - reach, x + reach, height));
+    const transform = `translate(${x} 0) rotate(${rotate}) scale(${mirror * scale} ${scale}) translate(${-b.width / 2} 0)`;
+    paint(bright, b, style.bright, transform);
+    paint(glow, b, style.afterglow, transform);
+
+    if (gentle) {
+      const g = cfg.gentle;
+      bright.animate([{ opacity: 0 }, { opacity: g.peak }, { opacity: 0 }], {
+        duration: g.durationMs,
+        easing: "ease-in-out",
+      });
+      return;
+    }
+    // Per-keyframe timing (no effect-level easing, which would warp the peaks).
+    const t = cfg.timeline;
+    const end = t.secondMs + t.fadeMs;
+    bright.animate(
+      [
+        { opacity: 0, offset: 0 },
+        { opacity: 1, offset: t.riseMs / end },
+        { opacity: t.dip, offset: t.dipMs / end },
+        { opacity: t.second, offset: t.secondMs / end },
+        { opacity: 0, offset: 1 },
+      ],
+      { duration: end },
+    );
+    glow.animate(
+      [
+        { opacity: 0, offset: 0 },
+        { opacity: 0, offset: t.secondMs / t.goneMs },
+        { opacity: t.afterglow, offset: (t.secondMs + t.fadeMs * 0.45) / t.goneMs },
+        { opacity: 0, offset: 1 },
+      ],
+      { duration: t.goneMs },
+    );
+    wash.animate(
+      [
+        { opacity: 0, offset: 0 },
+        { opacity: cfg.washAlpha, offset: t.riseMs / end },
+        { opacity: 0, offset: 1 },
+      ],
+      { duration: end },
+    );
+  };
+
+  const interval = () => (gentle ? rand(cfg.gentle.intervalMs) : rand(cfg.intervalMs) * slow);
   const schedule = (ms: number) => {
-    window.clearTimeout(timer);
+    clearTimeout(timer);
     timer = window.setTimeout(() => {
       strike();
-      schedule(rand(cfg.intervalMs) * slow);
+      schedule(interval());
     }, ms);
   };
-
   const onVisibility = () => {
-    if (document.hidden) window.clearTimeout(timer);
-    else if (data) schedule(rand(cfg.intervalMs) * slow);
-  };
-  const onReduced = () => {
-    if (reduced.matches) stop();
-  };
-  const stop = () => {
-    window.clearTimeout(timer);
-    data = undefined;
-    document.removeEventListener("visibilitychange", onVisibility);
-    window.removeEventListener("storm:strike", strike);
-    reduced.removeEventListener("change", onReduced);
+    if (document.hidden) clearTimeout(timer);
+    else if (bolts.length) schedule(interval());
   };
 
   document.addEventListener("visibilitychange", onVisibility);
   // Manual trigger for the /dev/backdrop playground and tests.
-  window.addEventListener("storm:strike", strike);
-  reduced.addEventListener("change", onReduced);
-
+  addEventListener("storm:strike", strike);
   fetch(cfg.src)
-    .then((response) => response.json() as Promise<StormData>)
+    .then((r) => r.json() as Promise<{ bolts: Bolt[] }>)
     .then((json) => {
-      data = json;
-      schedule(rand(cfg.firstStrikeMs) * slow);
+      bolts = json.bolts;
+      schedule(rand(cfg.firstStrikeMs));
     })
-    .catch(() => stop());
+    .catch(() => {});
 
-  return stop;
+  return () => {
+    clearTimeout(timer);
+    bolts = [];
+    document.removeEventListener("visibilitychange", onVisibility);
+    removeEventListener("storm:strike", strike);
+  };
 }

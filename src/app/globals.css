@@ -168,11 +168,12 @@
     }
   }
 
-  /* Reduced motion: kill transforms/large motion, keep short opacity fades. */
+  /* Reduced motion: kill transforms/large motion, keep short opacity fades
+     (unless the ?effects=full review aid set html[data-effects="full"]). */
   @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
+    html:not([data-effects="full"]) *,
+    html:not([data-effects="full"]) *::before,
+    html:not([data-effects="full"]) *::after {
       animation-duration: 1ms !important;
       animation-iteration-count: 1 !important;
       scroll-behavior: auto !important;
@@ -182,26 +183,44 @@
 }
 
 /*
- * <Reveal>: visible by default; scroll-driven fade + lift where supported.
- * No animation at all under prefers-reduced-motion.
+ * <Reveal>: section reveal (16 px lift + opacity, children staggered 75 ms).
+ * Visible without JS; Effects adds data-inview when the section enters the
+ * viewport. Never used on the LCP element. Off under reduced motion.
  */
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    [data-reveal] {
-      animation: reveal-in linear both;
-      animation-timeline: view();
-      animation-range: entry 0% entry 70%;
-    }
-  }
-}
-
-@keyframes reveal-in {
-  from {
+@media (scripting: enabled) {
+  [data-reveal]:not([data-inview]) > * {
     opacity: 0;
     translate: 0 var(--reveal-distance, 16px);
   }
-  to {
+
+  [data-reveal] > * {
+    transition:
+      opacity var(--dur-slow) var(--ease-main),
+      translate var(--dur-slow) var(--ease-main);
+    transition-delay: calc(var(--reveal-index, 0) * 75ms);
+  }
+}
+
+[data-reveal] > :nth-child(2) {
+  --reveal-index: 1;
+}
+
+[data-reveal] > :nth-child(3) {
+  --reveal-index: 2;
+}
+
+[data-reveal] > :nth-child(4) {
+  --reveal-index: 3;
+}
+
+[data-reveal] > :nth-child(n + 5) {
+  --reveal-index: 4;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-effects="full"]) [data-reveal] > * {
     opacity: 1;
-    translate: 0 0;
+    translate: none;
+    transition: none;
   }
 }

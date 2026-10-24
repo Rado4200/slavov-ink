@@ -26,7 +26,8 @@ export function SmoothScroll() {
     };
 
     const start = async () => {
-      if (cancelled || lenis || !finePointer.matches || reducedMotion.matches) return;
+      const reduced = reducedMotion.matches && document.documentElement.dataset.effects !== "full";
+      if (cancelled || lenis || !finePointer.matches || reduced) return;
       const { default: LenisClass } = await import("lenis");
       if (cancelled) return;
       lenis = new LenisClass({

@@ -12,84 +12,332 @@
     }
   },
   "routes": {
-    "home": [
-      {
-        "desktop": {
-          "royal": "/backdrop/tiles/home-0-d-royal.avif",
-          "royal-light": "/backdrop/tiles/home-0-d-royal-light.avif",
-          "bone": "/backdrop/tiles/home-0-d-bone.avif"
+    "home": {
+      "seed": 1754441210,
+      "candidates": [
+        {
+          "seed": 1754441210,
+          "clearance": 53,
+          "balance": 70,
+          "density": 72,
+          "total": 64
         },
-        "mobile": {
-          "royal": "/backdrop/tiles/home-0-m-royal.avif",
-          "royal-light": "/backdrop/tiles/home-0-m-royal-light.avif",
-          "bone": "/backdrop/tiles/home-0-m-bone.avif"
-        }
-      },
-      {
-        "desktop": {
-          "royal": "/backdrop/tiles/home-1-d-royal.avif",
-          "royal-light": "/backdrop/tiles/home-1-d-royal-light.avif",
-          "bone": "/backdrop/tiles/home-1-d-bone.avif"
+        {
+          "seed": 1771218829,
+          "clearance": 55,
+          "balance": 72,
+          "density": 68,
+          "total": 64
         },
-        "mobile": {
-          "royal": "/backdrop/tiles/home-1-m-royal.avif",
-          "royal-light": "/backdrop/tiles/home-1-m-royal-light.avif",
-          "bone": "/backdrop/tiles/home-1-m-bone.avif"
+        {
+          "seed": 1653775496,
+          "clearance": 62,
+          "balance": 60,
+          "density": 70,
+          "total": 64
+        },
+        {
+          "seed": 1737663591,
+          "clearance": 59,
+          "balance": 64,
+          "density": 64,
+          "total": 62
+        },
+        {
+          "seed": 1720885972,
+          "clearance": 50,
+          "balance": 67,
+          "density": 67,
+          "total": 60
         }
+      ],
+      "sections": [
+        {
+          "desktop": {
+            "layers": {
+              "royal": "/backdrop/tiles/home-0-d-royal.avif",
+              "royal-light": "/backdrop/tiles/home-0-d-royal-light.avif",
+              "bone": "/backdrop/tiles/home-0-d-bone.avif"
+            },
+            "heroes": [
+              {
+                "url": "/backdrop/tiles/home-0-d-hero-0.avif",
+                "layer": "bone",
+                "angle": 0.8021,
+                "start": -895,
+                "end": 697
+              },
+              {
+                "url": "/backdrop/tiles/home-0-d-hero-1.avif",
+                "layer": "bone",
+                "angle": 0.7201,
+                "start": -1019,
+                "end": 222
+              },
+              {
+                "url": "/backdrop/tiles/home-0-d-hero-2.avif",
+                "layer": "bone",
+                "angle": -2.3427,
+                "start": -959,
+                "end": 560
+              }
+            ]
+          },
+          "mobile": {
+            "layers": {
+              "royal": "/backdrop/tiles/home-0-m-royal.avif",
+              "royal-light": null,
+              "bone": "/backdrop/tiles/home-0-m-bone.avif"
+            },
+            "heroes": [
+              {
+                "url": "/backdrop/tiles/home-0-m-hero-0.avif",
+                "layer": "bone",
+                "angle": 2.5012,
+                "start": -953,
+                "end": 337
+              }
+            ]
+          }
+        },
+        {
+          "desktop": {
+            "layers": {
+              "royal": "/backdrop/tiles/home-1-d-royal.avif",
+              "royal-light": "/backdrop/tiles/home-1-d-royal-light.avif",
+              "bone": "/backdrop/tiles/home-1-d-bone.avif"
+            },
+            "heroes": []
+          },
+          "mobile": {
+            "layers": {
+              "royal": "/backdrop/tiles/home-1-m-royal.avif",
+              "royal-light": null,
+              "bone": "/backdrop/tiles/home-1-m-bone.avif"
+            },
+            "heroes": []
+          }
+        }
+      ]
+    },
+    "about": {
+      "seed": 1222593690,
+      "candidates": [
+        {
+          "seed": 1222593690,
+          "clearance": 47,
+          "balance": 81,
+          "density": 72,
+          "total": 65
+        },
+        {
+          "seed": 1205816071,
+          "clearance": 49,
+          "balance": 69,
+          "density": 76,
+          "total": 63
+        },
+        {
+          "seed": 1189038452,
+          "clearance": 51,
+          "balance": 66,
+          "density": 69,
+          "total": 61
+        },
+        {
+          "seed": 1155483214,
+          "clearance": 44,
+          "balance": 77,
+          "density": 67,
+          "total": 61
+        },
+        {
+          "seed": 1239371309,
+          "clearance": 56,
+          "balance": 59,
+          "density": 67,
+          "total": 60
+        }
+      ],
+      "sections": [
+        {
+          "desktop": {
+            "layers": {
+              "royal": "/backdrop/tiles/about-0-d-royal.avif",
+              "royal-light": "/backdrop/tiles/about-0-d-royal-light.avif",
+              "bone": "/backdrop/tiles/about-0-d-bone.avif"
+            },
+            "heroes": [
+              {
+                "url": "/backdrop/tiles/about-0-d-hero-0.avif",
+                "layer": "royal",
+                "angle": -2.5803,
+                "start": -878,
+                "end": 587
+              },
+              {
+                "url": "/backdrop/tiles/about-0-d-hero-1.avif",
+                "layer": "bone",
+                "angle": 0.7098,
+                "start": -857,
+                "end": 542
+              },
+              {
+                "url": "/backdrop/tiles/about-0-d-hero-2.avif",
+                "layer": "bone",
+                "angle": -2.4721,
+                "start": -787,
+                "end": 483
+              }
+            ]
+          },
+          "mobile": {
+            "layers": {
+              "royal": "/backdrop/tiles/about-0-m-royal.avif",
+              "royal-light": null,
+              "bone": "/backdrop/tiles/about-0-m-bone.avif"
+            },
+            "heroes": [
+              {
+                "url": "/backdrop/tiles/about-0-m-hero-0.avif",
+                "layer": "bone",
+                "angle": 2.5276,
+                "start": -639,
+                "end": 565
+              }
+            ]
+          }
+        },
+        {
+          "desktop": {
+            "layers": {
+              "royal": "/backdrop/tiles/about-1-d-royal.avif",
+              "royal-light": "/backdrop/tiles/about-1-d-royal-light.avif",
+              "bone": "/backdrop/tiles/about-1-d-bone.avif"
+            },
+            "heroes": []
+          },
+          "mobile": {
+            "layers": {
+              "royal": "/backdrop/tiles/about-1-m-royal.avif",
+              "royal-light": null,
+              "bone": "/backdrop/tiles/about-1-m-bone.avif"
+            },
+            "heroes": []
+          }
+        }
+      ]
+    },
+    "portfolio": {
+      "seed": 1563363545,
+      "candidates": [
+        {
+          "seed": 1563363545,
+          "clearance": 61,
+          "balance": 77,
+          "density": 66,
+          "total": 67
+        },
+        {
+          "seed": 1546585926,
+          "clearance": 54,
+          "balance": 80,
+          "density": 69,
+          "total": 66
+        },
+        {
+          "seed": 1596918783,
+          "clearance": 50,
+          "balance": 74,
+          "density": 71,
+          "total": 63
+        },
+        {
+          "seed": 1529808307,
+          "clearance": 51,
+          "balance": 73,
+          "density": 65,
+          "total": 62
+        },
+        {
+          "seed": 1513030688,
+          "clearance": 47,
+          "balance": 63,
+          "density": 71,
+          "total": 59
+        }
+      ],
+      "sections": [
+        {
+          "desktop": {
+            "layers": {
+              "royal": "/backdrop/tiles/portfolio-0-d-royal.avif",
+              "royal-light": "/backdrop/tiles/portfolio-0-d-royal-light.avif",
+              "bone": "/backdrop/tiles/portfolio-0-d-bone.avif"
+            },
+            "heroes": []
+          },
+          "mobile": {
+            "layers": {
+              "royal": "/backdrop/tiles/portfolio-0-m-royal.avif",
+              "royal-light": "/backdrop/tiles/portfolio-0-m-royal-light.avif",
+              "bone": "/backdrop/tiles/portfolio-0-m-bone.avif"
+            },
+            "heroes": []
+          }
+        },
+        {
+          "desktop": {
+            "layers": {
+              "royal": "/backdrop/tiles/portfolio-1-d-royal.avif",
+              "royal-light": "/backdrop/tiles/portfolio-1-d-royal-light.avif",
+              "bone": "/backdrop/tiles/portfolio-1-d-bone.avif"
+            },
+            "heroes": []
+          },
+          "mobile": {
+            "layers": {
+              "royal": "/backdrop/tiles/portfolio-1-m-royal.avif",
+              "royal-light": null,
+              "bone": "/backdrop/tiles/portfolio-1-m-bone.avif"
+            },
+            "heroes": []
+          }
+        }
+      ]
+    }
+  },
+  "dust": {
+    "desktop": {
+      "count": 161,
+      "layers": {
+        "far-royal": "/backdrop/dust-d-far-royal.avif",
+        "far-bone": "/backdrop/dust-d-far-bone.avif",
+        "near-royal-light": "/backdrop/dust-d-near-royal-light.avif",
+        "near-bone": "/backdrop/dust-d-near-bone.avif"
       }
-    ],
-    "about": [
-      {
-        "desktop": {
-          "royal": "/backdrop/tiles/about-0-d-royal.avif",
-          "royal-light": "/backdrop/tiles/about-0-d-royal-light.avif",
-          "bone": "/backdrop/tiles/about-0-d-bone.avif"
-        },
-        "mobile": {
-          "royal": "/backdrop/tiles/about-0-m-royal.avif",
-          "royal-light": "/backdrop/tiles/about-0-m-royal-light.avif",
-          "bone": "/backdrop/tiles/about-0-m-bone.avif"
-        }
-      },
-      {
-        "desktop": {
-          "royal": "/backdrop/tiles/about-1-d-royal.avif",
-          "royal-light": "/backdrop/tiles/about-1-d-royal-light.avif",
-          "bone": "/backdrop/tiles/about-1-d-bone.avif"
-        },
-        "mobile": {
-          "royal": "/backdrop/tiles/about-1-m-royal.avif",
-          "royal-light": "/backdrop/tiles/about-1-m-royal-light.avif",
-          "bone": "/backdrop/tiles/about-1-m-bone.avif"
-        }
+    },
+    "mobile": {
+      "count": 97,
+      "layers": {
+        "far-royal": "/backdrop/dust-m-far-royal.avif",
+        "far-bone": "/backdrop/dust-m-far-bone.avif",
+        "near-royal-light": "/backdrop/dust-m-near-royal-light.avif",
+        "near-bone": "/backdrop/dust-m-near-bone.avif"
       }
-    ],
-    "portfolio": [
-      {
-        "desktop": {
-          "royal": "/backdrop/tiles/portfolio-0-d-royal.avif",
-          "royal-light": "/backdrop/tiles/portfolio-0-d-royal-light.avif",
-          "bone": "/backdrop/tiles/portfolio-0-d-bone.avif"
-        },
-        "mobile": {
-          "royal": "/backdrop/tiles/portfolio-0-m-royal.avif",
-          "royal-light": "/backdrop/tiles/portfolio-0-m-royal-light.avif",
-          "bone": "/backdrop/tiles/portfolio-0-m-bone.avif"
-        }
-      },
-      {
-        "desktop": {
-          "royal": "/backdrop/tiles/portfolio-1-d-royal.avif",
-          "royal-light": "/backdrop/tiles/portfolio-1-d-royal-light.avif",
-          "bone": "/backdrop/tiles/portfolio-1-d-bone.avif"
-        },
-        "mobile": {
-          "royal": "/backdrop/tiles/portfolio-1-m-royal.avif",
-          "royal-light": "/backdrop/tiles/portfolio-1-m-royal-light.avif",
-          "bone": "/backdrop/tiles/portfolio-1-m-bone.avif"
-        }
-      }
-    ]
+    }
+  },
+  "contact": {
+    "desktop": {
+      "royal": "/backdrop/contact-d-royal.avif",
+      "royal-light": "/backdrop/contact-d-royal-light.avif",
+      "bone": "/backdrop/contact-d-bone.avif"
+    },
+    "mobile": {
+      "royal": "/backdrop/contact-m-royal.avif",
+      "royal-light": "/backdrop/contact-m-royal-light.avif",
+      "bone": "/backdrop/contact-m-bone.avif"
+    }
   },
   "storm": "/backdrop/storm.json",
   "grain": {

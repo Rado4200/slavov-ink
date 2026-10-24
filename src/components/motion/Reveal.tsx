@@ -8,10 +8,9 @@ type RevealProps = {
 };
 
 /**
- * Reveal-on-scroll with zero JavaScript. Content is visible by default (no-JS
- * safe, never delays LCP); browsers that support scroll-driven animations
- * (`animation-timeline: view()`) fade and lift it in as it enters the
- * viewport. Disabled under prefers-reduced-motion. Styles: globals.css.
+ * Section reveal: children fade and lift in (staggered 75 ms) when the section
+ * enters the viewport (<Effects> sets data-inview). Visible without JS, never
+ * wraps the LCP element, off under reduced motion. Styles: globals.css.
  */
 export function Reveal({ children, distance = 16, className }: RevealProps) {
   const style = { "--reveal-distance": `${distance}px` } as CSSProperties;

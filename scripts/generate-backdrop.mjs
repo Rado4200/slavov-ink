@@ -1,26 +1,25 @@
 #!/usr/bin/env node
 /**
- * Generates the ink atmosphere (v2) from a seed.
+ * Generates the ink atmosphere (v3).
  *
  * Usage: pnpm backdrop:generate [--seed N] [--sheet path/to/contact-sheet.png]
- *        (default seed: the one in the manifest)
+ *        (default base seed: the one in the manifest)
  *
- * Per route and ~100vh section, one tile per variant (desktop landscape,
- * mobile portrait) is composed in vector, rasterized, and saved as one
- * alpha-only AVIF mask per color layer (royal, royal-light, bone). The page
- * paints them as CSS masks over token colors, so:
- *   - dry-brush texture costs bytes, not DOM nodes or runtime filters;
- *   - colors stay live design tokens;
- *   - masks are never LCP candidates.
+ * Per route, 5 candidate seeds are composed and scored (clearance, balance,
+ * density); the best is pinned. Each ~100vh section is rendered per variant
+ * (desktop landscape, mobile portrait) as alpha-only AVIF masks per color
+ * layer, painted by CSS over palette tokens (never LCP candidates). Home and
+ * About export their long diagonals separately so they can draw on.
  *
  * Outputs
  *   public/backdrop/tiles/<route>-<section>-<d|m>-<layer>.avif
- *   public/backdrop/storm.json      lightning bolts (inline SVG paths)
- *   public/backdrop/grain.webp      film-grain tile
+ *   public/backdrop/tiles/<route>-0-<d|m>-hero-<i>.avif   (draw-on diagonals)
+ *   public/backdrop/dust-<d|m>-<layer>.avif                (page-wide particles)
+ *   public/backdrop/contact-<d|m>-<layer>.avif             (behind the glass panel)
+ *   public/backdrop/storm.json, public/backdrop/grain.webp
  *   src/components/atmosphere/backdrop-manifest.json
  *
- * Fails when a budget is exceeded: total <= 220 KB, mobile payload per
- * route <= 120 KB.
+ * Fails when a budget is exceeded: total <= 240 KB, phone payload per route <= 140 KB.
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -28,27 +27,40 @@ import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 
 import {
+  DUST_LAYERS,
   FAMILIES,
   LAYERS,
+  SAFE_CAPS,
   TILES,
+  clampSafeZone,
+  composeContactTile,
+  composeDust,
   composeTile,
   createRng,
+  dustSample,
   familySample,
   generateStorm,
   hashSeed,
-  spatterSample,
-  tileLayersToSvg,
+  pathsToSvg,
+  scoreTile,
 } from "./backdrop/core.mjs";
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const outDir = path.join(root, "public/backdrop");
 const manifestPath = path.join(root, "src/components/atmosphere/backdrop-manifest.json");
 
-/** Unique sections per route; longer pages cycle them (mirrored). */
-const ROUTES = { home: 2, about: 2, portfolio: 2 };
-const BUDGET = { total: 220 * 1024, mobilePerRoute: 120 * 1024 };
+/** Unique sections per route (longer pages cycle them, mirrored) and draw-on. */
+const ROUTES = {
+  home: { sections: 2, hero: true },
+  about: { sections: 2, hero: true },
+  portfolio: { sections: 2, hero: false },
+};
+const CANDIDATES = 5;
+const BUDGET = { total: 240 * 1024, phonePerRoute: 140 * 1024 };
 const AVIF = { quality: 50, effort: 6 };
 const GRAIN_SIZE = 128;
+const FEATHER = 0.07;
+const VARIANTS = ["desktop", "mobile"];
 
 function argValue(name) {
   const index = process.argv.indexOf(name);
@@ -69,24 +81,37 @@ function readSeed() {
   return 7;
 }
 
-/** Fraction of the tile height over which art fades out at the top and bottom. */
-const FEATHER = 0.07;
+const colorOf = (layer) =>
+  layer.endsWith("royal-light") ? "royal-light" : layer.endsWith("royal") ? "royal" : "bone";
 
-async function alphaMask(svg, width, height) {
-  const alpha = await sharp(Buffer.from(svg)).ensureAlpha().extractChannel(3).raw().toBuffer();
-  // Feather the top and bottom edges so strokes never end in a hard line at tile seams.
-  const band = FEATHER * height;
-  for (let y = 0; y < height; y++) {
-    const t = Math.min(1, Math.min(y, height - 1 - y) / band);
-    const f = t * t * (3 - 2 * t);
-    if (f >= 1) continue;
-    for (let x = 0, i = y * width; x < width; x++, i++) alpha[i] = Math.round(alpha[i] * f);
+/** Rasterizes paths to an alpha-only AVIF mask, clamped in the content column. */
+async function mask(width, height, paths, { safe, cap, feather = true }) {
+  const alpha = await sharp(Buffer.from(pathsToSvg(width, height, paths)))
+    .ensureAlpha()
+    .extractChannel(3)
+    .raw()
+    .toBuffer();
+  if (safe) clampSafeZone(alpha, width, height, safe, cap);
+  if (feather) {
+    const band = FEATHER * height;
+    for (let y = 0; y < height; y++) {
+      const t = Math.min(1, Math.min(y, height - 1 - y) / band);
+      const f = t * t * (3 - 2 * t);
+      if (f >= 1) continue;
+      for (let x = 0, i = y * width; x < width; x++, i++) alpha[i] = Math.round(alpha[i] * f);
+    }
   }
-  const mask = await sharp({ create: { width, height, channels: 3, background: "#000" } })
+  return sharp({ create: { width, height, channels: 3, background: "#000" } })
     .joinChannel(alpha, { raw: { width, height, channels: 1 } })
     .avif(AVIF)
     .toBuffer();
-  return mask;
+}
+
+const sizes = new Map();
+function save(relative, buffer) {
+  fs.writeFileSync(path.join(outDir, relative), buffer);
+  sizes.set(relative, buffer.length);
+  return `/backdrop/${relative.replaceAll("\\", "/")}`;
 }
 
 async function writeGrain(seed) {
@@ -96,17 +121,18 @@ async function writeGrain(seed) {
     pixels.fill(255, i * 4, i * 4 + 3);
     pixels[i * 4 + 3] = Math.floor(rng() * 256);
   }
-  const file = path.join(outDir, "grain.webp");
-  await sharp(pixels, { raw: { width: GRAIN_SIZE, height: GRAIN_SIZE, channels: 4 } })
+  const buffer = await sharp(pixels, {
+    raw: { width: GRAIN_SIZE, height: GRAIN_SIZE, channels: 4 },
+  })
     .webp({ quality: 60, alphaQuality: 45, effort: 6 })
-    .toFile(file);
-  return fs.statSync(file).size;
+    .toBuffer();
+  return save("grain.webp", buffer);
 }
 
 async function writeContactSheet(seed, file) {
   const cell = { width: 360, height: 260 };
   const cols = 6;
-  const rows = [...FAMILIES, "spatter"];
+  const rows = [...FAMILIES, "dust"];
   const pad = 36;
   const width = cell.width * cols;
   const height = rows.length * (cell.height + pad);
@@ -117,16 +143,19 @@ async function writeContactSheet(seed, file) {
     for (let c = 0; c < cols; c++) {
       const sampleSeed = hashSeed(seed, "sheet", family, c);
       const d =
-        family === "spatter"
-          ? spatterSample(sampleSeed, cell)
-          : familySample(sampleSeed, family, cell);
+        family === "dust" ? dustSample(sampleSeed, cell) : familySample(sampleSeed, family, cell);
       const fill = c % 3 === 2 ? "#b451fb" : "#fcfcfc";
       const clip = `c${r}-${c}`;
       body += `<clipPath id="${clip}"><rect width="${cell.width}" height="${cell.height}"/></clipPath><g transform="translate(${c * cell.width} ${y + pad})"><g clip-path="url(#${clip})"><path fill="${fill}" fill-opacity="0.85" d="${d}"/></g><rect width="${cell.width}" height="${cell.height}" fill="none" stroke="#1a1a1a"/></g>`;
     }
   });
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">${body}</svg>`;
-  await sharp(Buffer.from(svg)).png().toFile(file);
+  await sharp(
+    Buffer.from(
+      `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">${body}</svg>`,
+    ),
+  )
+    .png()
+    .toFile(file);
   process.stdout.write(`contact sheet: ${path.relative(root, file)}\n`);
 }
 
@@ -134,68 +163,171 @@ const seed = readSeed();
 fs.rmSync(outDir, { recursive: true, force: true });
 fs.mkdirSync(path.join(outDir, "tiles"), { recursive: true });
 
-const sizes = new Map();
+// 1. Pick the best of 5 candidate seeds per route.
 const routes = {};
-for (const [route, sections] of Object.entries(ROUTES)) {
-  routes[route] = [];
-  for (let section = 0; section < sections; section++) {
-    const entry = {};
-    for (const variant of Object.keys(TILES)) {
-      const tile = composeTile(hashSeed(seed, route, section, variant), { variant });
-      const svgs = tileLayersToSvg(tile);
-      entry[variant] = {};
-      for (const layer of LAYERS) {
-        if (!svgs[layer]) {
-          entry[variant][layer] = null;
-          continue;
-        }
-        const name = `${route}-${section}-${variant[0]}-${layer}.avif`;
-        const buffer = await alphaMask(svgs[layer], tile.width, tile.height);
-        fs.writeFileSync(path.join(outDir, "tiles", name), buffer);
-        sizes.set(name, buffer.length);
-        entry[variant][layer] = `/backdrop/tiles/${name}`;
+for (const [route, cfg] of Object.entries(ROUTES)) {
+  const candidates = [];
+  for (let k = 0; k < CANDIDATES; k++) {
+    const candidateSeed = hashSeed(seed, route, "candidate", k);
+    const scores = [];
+    for (let section = 0; section < cfg.sections; section++) {
+      for (const variant of VARIANTS) {
+        scores.push(
+          scoreTile(
+            composeTile(hashSeed(candidateSeed, section, variant), {
+              variant,
+              hero: cfg.hero && section === 0,
+            }),
+          ),
+        );
       }
     }
-    routes[route].push(entry);
-    process.stdout.write(`${route} section ${section}: done\n`);
+    const avg = (key) => Math.round(scores.reduce((sum, s) => sum + s[key], 0) / scores.length);
+    candidates.push({
+      seed: candidateSeed,
+      clearance: avg("clearance"),
+      balance: avg("balance"),
+      density: avg("density"),
+      total: avg("total"),
+    });
+  }
+  candidates.sort((a, b) => b.total - a.total);
+  routes[route] = { seed: candidates[0].seed, candidates, sections: [] };
+  process.stdout.write(
+    `${route}: pinned ${candidates[0].seed} (score ${candidates[0].total}); others ${candidates
+      .slice(1)
+      .map((c) => `${c.seed}:${c.total}`)
+      .join(", ")}\n`,
+  );
+}
+
+// 2. Render the pinned compositions.
+for (const [route, cfg] of Object.entries(ROUTES)) {
+  for (let section = 0; section < cfg.sections; section++) {
+    const entry = {};
+    for (const variant of VARIANTS) {
+      const t = TILES[variant];
+      const tile = composeTile(hashSeed(routes[route].seed, section, variant), {
+        variant,
+        hero: cfg.hero && section === 0,
+      });
+      const layers = {};
+      for (const layer of LAYERS) {
+        const paths = tile.elements.filter((e) => e.layer === layer);
+        layers[layer] = paths.length
+          ? save(
+              `tiles/${route}-${section}-${variant[0]}-${layer}.avif`,
+              await mask(t.width, t.height, paths, { safe: t.safe, cap: SAFE_CAPS[layer] }),
+            )
+          : null;
+      }
+      const heroes = [];
+      for (const [i, hero] of tile.heroes.entries()) {
+        const url = save(
+          `tiles/${route}-${section}-${variant[0]}-hero-${i}.avif`,
+          await mask(t.width, t.height, [hero], { safe: t.safe, cap: SAFE_CAPS[hero.layer] }),
+        );
+        // Draw-on geometry: direction and start/end projections from the tile centre (tile px).
+        const ux = Math.cos(hero.angle);
+        const uy = Math.sin(hero.angle);
+        const proj = ([x, y]) => Math.round((x - t.width / 2) * ux + (y - t.height / 2) * uy);
+        heroes.push({
+          url,
+          layer: hero.layer,
+          angle: Math.round(hero.angle * 10000) / 10000,
+          start: proj(hero.start),
+          end: proj(hero.end),
+        });
+      }
+      entry[variant] = { layers, heroes };
+    }
+    routes[route].sections.push(entry);
+  }
+}
+
+// 3. Page-wide dust (two depth layers) and the contact tile.
+const dust = {};
+for (const variant of VARIANTS) {
+  const t = TILES[variant];
+  const d = composeDust(hashSeed(seed, "dust", variant), { variant });
+  dust[variant] = { count: d.count, layers: {} };
+  for (const layer of DUST_LAYERS) {
+    dust[variant].layers[layer] = save(
+      `dust-${variant[0]}-${layer}.avif`,
+      await mask(t.width, t.height, d.layers[layer], {
+        safe: t.safe,
+        cap: SAFE_CAPS[colorOf(layer)],
+        feather: false,
+      }),
+    );
+  }
+}
+const contact = {};
+for (const variant of VARIANTS) {
+  const t = TILES[variant];
+  const c = composeContactTile(hashSeed(seed, "contact", variant), { variant });
+  contact[variant] = {};
+  for (const layer of LAYERS) {
+    const paths = c.elements.filter((e) => e.layer === layer);
+    contact[variant][layer] = paths.length
+      ? save(
+          `contact-${variant[0]}-${layer}.avif`,
+          await mask(t.width, t.height, paths, {
+            safe: t.safe,
+            cap: SAFE_CAPS[layer],
+            feather: true,
+          }),
+        )
+      : null;
   }
 }
 
 const storm = generateStorm(hashSeed(seed, "storm"));
 const stormJson = JSON.stringify(storm);
 fs.writeFileSync(path.join(outDir, "storm.json"), stormJson);
-const grainBytes = await writeGrain(seed);
+sizes.set("storm.json", stormJson.length);
+const grain = await writeGrain(seed);
 
 const manifest = {
   seed,
   format: "avif",
   tiles: Object.fromEntries(
-    Object.entries(TILES).map(([variant, t]) => [variant, { width: t.width, height: t.height }]),
+    VARIANTS.map((v) => [v, { width: TILES[v].width, height: TILES[v].height }]),
   ),
   routes,
+  dust,
+  contact,
   storm: "/backdrop/storm.json",
-  grain: { file: "/backdrop/grain.webp", size: GRAIN_SIZE },
+  grain: { file: grain, size: GRAIN_SIZE },
 };
 fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + "\n");
 
-// Budgets.
+// 4. Budgets.
 const kb = (bytes) => `${(bytes / 1024).toFixed(1)} KB`;
-const shared = stormJson.length + grainBytes;
-const total = [...sizes.values()].reduce((a, b) => a + b, 0) + shared;
+const sum = (filter) =>
+  [...sizes.entries()].filter(([name]) => filter(name)).reduce((a, [, b]) => a + b, 0);
+const shared = sizes.get("storm.json") + sizes.get("grain.webp");
+const total = sum(() => true);
 let failed = false;
-process.stdout.write(`\nseed ${seed}\n`);
+process.stdout.write(`\nbase seed ${seed}\n`);
 for (const route of Object.keys(ROUTES)) {
-  const sum = (variant) =>
-    [...sizes.entries()]
-      .filter(([name]) => name.startsWith(`${route}-`) && name.includes(`-${variant}-`))
-      .reduce((a, [, b]) => a + b, 0);
-  const mobile = sum("m") + shared;
+  const desktop = sum((n) => n.startsWith(`tiles/${route}-`) && n.includes("-d-"));
+  const phone =
+    sum((n) => n.startsWith(`tiles/${route}-`) && n.includes("-m-")) +
+    sum((n) => n.startsWith("dust-m-")) +
+    (route === "home" ? sum((n) => n.startsWith("contact-m-")) : 0) +
+    shared;
   process.stdout.write(
-    `${route.padEnd(10)} desktop tiles ${kb(sum("d")).padStart(9)}   mobile payload ${kb(mobile).padStart(9)} / ${kb(BUDGET.mobilePerRoute)}\n`,
+    `${route.padEnd(10)} desktop tiles ${kb(desktop).padStart(9)}   phone payload ${kb(phone).padStart(9)} / ${kb(BUDGET.phonePerRoute)}\n`,
   );
-  if (mobile > BUDGET.mobilePerRoute) failed = true;
+  if (phone > BUDGET.phonePerRoute) failed = true;
 }
-process.stdout.write(`storm.json ${kb(stormJson.length)}, grain ${kb(grainBytes)}\n`);
+process.stdout.write(
+  `dust ${kb(sum((n) => n.startsWith("dust-")))}, contact ${kb(sum((n) => n.startsWith("contact-")))}, storm.json ${kb(sizes.get("storm.json"))}, grain ${kb(sizes.get("grain.webp"))}\n`,
+);
+process.stdout.write(
+  `dust particles: desktop ${dust.desktop.count}, mobile ${dust.mobile.count}\n`,
+);
 process.stdout.write(`TOTAL ${kb(total)} / ${kb(BUDGET.total)}\n`);
 if (total > BUDGET.total) failed = true;
 
