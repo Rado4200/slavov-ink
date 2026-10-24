@@ -1,0 +1,164 @@
+/*
+ * Glass contact panel. backdrop-filter is used on this one panel only.
+ * Colors come from palette tokens via color-mix().
+ */
+.glass {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: var(--corner-lg);
+  background: color-mix(in srgb, var(--bone) 5%, transparent);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  backdrop-filter: blur(20px) saturate(150%);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--bone) 14%, transparent),
+    0 0 70px -22px color-mix(in srgb, var(--royal) 60%, transparent),
+    0 30px 60px -30px rgb(0 0 0 / 0.8);
+}
+
+/* 1 px gradient border ring (bone 18% to royal 25%), drawn as a masked frame. */
+.glass::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  padding: 1px;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--bone) 18%, transparent),
+    color-mix(in srgb, var(--royal) 25%, transparent)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+  pointer-events: none;
+}
+
+/* Diagonal light sheen: moves on hover / focus-within (transform only). */
+.glass::before {
+  content: "";
+  position: absolute;
+  inset: -60%;
+  z-index: -1;
+  background: linear-gradient(
+    115deg,
+    transparent 42%,
+    color-mix(in srgb, var(--bone) 7%, transparent) 50%,
+    transparent 58%
+  );
+  translate: -14% 0;
+  transition: translate var(--dur-slower) var(--ease-main);
+  pointer-events: none;
+}
+
+.glass:hover::before,
+.glass:focus-within::before {
+  translate: 14% 0;
+}
+
+.glass-grain {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image: url(/backdrop/grain.webp);
+  background-size: 128px 128px;
+  opacity: 0.035;
+  pointer-events: none;
+}
+
+/* Solid ink surface when glass is unavailable or unwanted. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass {
+    background: color-mix(in srgb, var(--ink) 88%, transparent);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass {
+    background: color-mix(in srgb, var(--ink) 88%, transparent);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/* Fields: 48-52 px tall, 16 px text (no iOS zoom), royal-light focus ring. */
+.contact-input {
+  display: block;
+  width: 100%;
+  margin-top: 0.5rem;
+  min-height: 3.125rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--bone) 16%, transparent);
+  border-radius: var(--corner-md);
+  background: color-mix(in srgb, var(--ink) 45%, transparent);
+  color: var(--bone);
+  font-size: 1rem;
+  line-height: 1.5;
+  scroll-margin-block: 7rem; /* keeps the field clear of the on-screen keyboard */
+  transition: border-color var(--dur-fast) var(--ease-main);
+}
+
+textarea.contact-input {
+  min-height: 10rem;
+  resize: vertical;
+}
+
+.contact-input:focus-visible {
+  border-color: var(--royal-light);
+  outline: 2px solid var(--royal-light);
+  outline-offset: 2px;
+}
+
+/* Errors: bone border + icon + bone text (no off-palette red). */
+.contact-input.is-invalid {
+  border-color: var(--bone);
+}
+
+.contact-alert {
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--bone);
+  border-radius: var(--corner-md);
+}
+
+.contact-submit {
+  justify-self: start;
+  min-height: 3rem;
+  padding: 0 2rem;
+  border-radius: var(--corner-md);
+  background: var(--royal);
+  color: var(--bone);
+  transition:
+    opacity var(--dur-fast) var(--ease-main),
+    translate var(--dur-fast) var(--ease-main);
+}
+
+.contact-submit:hover {
+  translate: 0 -1px;
+}
+
+.contact-submit:disabled {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+/* Secondary channels: glass look without a second backdrop-filter. */
+.glass-button {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  padding: 0 1.25rem;
+  border: 1px solid color-mix(in srgb, var(--bone) 18%, transparent);
+  border-radius: var(--corner-md);
+  background: color-mix(in srgb, var(--bone) 6%, transparent);
+  color: var(--bone);
+  transition: translate var(--dur-fast) var(--ease-main);
+}
+
+.glass-button:hover {
+  translate: 0 -1px;
+}

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { Backdrop } from "@/components/atmosphere/Backdrop";
 import { Logo } from "@/components/brand/Logo";
+import { ContactSection } from "@/components/contact/ContactSection";
 import { PageHero } from "@/components/ui/PageHero";
 import { site } from "@/content/site";
 import { format, getLocale, getMessages } from "@/i18n/messages";
@@ -34,6 +35,7 @@ export default async function HomePage() {
         }
         intro={m.home.intro}
       />
+      <ContactSection />
     </>
   );
 }
