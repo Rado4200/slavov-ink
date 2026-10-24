@@ -22,9 +22,9 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function HomePage() {
   const m = await getMessages();
   return (
-    <div className="relative isolate">
-      <Backdrop variant="home" />
+    <>
+      <Backdrop route="home" />
       <PageHero heading={<Logo size="lg" preload />} intro={m.home.intro} />
-    </div>
+    </>
   );
 }

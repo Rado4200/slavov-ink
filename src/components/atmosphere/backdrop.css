@@ -1,115 +1,123 @@
 /*
- * Ink atmosphere. Static art, transform/opacity animation only, no filters.
- * Sizing rules use a container query, so the /dev/backdrop preview frame
- * behaves like a real viewport of the same width.
+ * Ink atmosphere v2 (see docs/atmosphere.md). Static masks, transform-only
+ * parallax, no filters. Colors are palette tokens; --backdrop-intensity
+ * scales everything.
  */
-.backdrop {
+
+/* ---- Tiles ------------------------------------------------------------- */
+
+.bd {
   position: absolute;
   inset: 0;
   z-index: var(--z-backdrop);
   overflow: hidden;
   pointer-events: none;
-  contain: paint;
-  container-type: inline-size;
 }
 
-.backdrop-layer {
+.bd-tile {
   position: absolute;
-  display: block;
-  opacity: calc(var(--layer-opacity) * var(--backdrop-intensity));
+  left: 0;
+  right: 0;
+  height: 100vh;
+  /* Off-screen tiles skip paint, so their masks are not fetched until needed. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 100vh;
+  contain: paint;
 }
 
-.backdrop-layer[data-art="mask"] {
-  background-color: currentColor;
-  mask-size: 100% 100%;
+.bd-tile[data-mirror] {
+  scale: -1 1;
+}
+
+.bd-layer {
+  --depth: 1;
+  position: absolute;
+  inset: -4vh 0;
+  opacity: var(--backdrop-intensity);
+  mask-image: var(--bd-d);
+  mask-size: cover;
+  mask-position: center;
   mask-repeat: no-repeat;
-  -webkit-mask-size: 100% 100%;
+  -webkit-mask-image: var(--bd-d);
+  -webkit-mask-size: cover;
+  -webkit-mask-position: center;
   -webkit-mask-repeat: no-repeat;
 }
 
-.backdrop-layer > svg {
-  display: block;
-  width: 100%;
-  height: 100%;
+.bd-layer[data-layer="royal"] {
+  --depth: 0.35;
+  background-color: var(--royal);
 }
 
-/* One bolt, off-centre behind the hero; resting opacity, flashes once. */
-.backdrop-bolt {
-  --layer-depth: 0.2;
-  position: absolute;
-  top: 1%;
-  right: 7%;
-  height: min(78%, 560px);
-  opacity: var(--backdrop-intensity);
+.bd-layer[data-layer="royal-light"] {
+  --depth: 0.65;
+  background-color: var(--royal-light);
 }
 
-.backdrop-bolt > svg {
-  --bolt-rest: 0.6;
-  display: block;
-  height: 100%;
-  width: auto;
-  opacity: var(--bolt-rest);
+.bd-layer[data-layer="bone"] {
+  background-color: var(--bone);
 }
 
-@container (max-width: 767px) {
-  .backdrop-layer[data-desktop-only] {
-    display: none;
-  }
-
-  .backdrop-bolt {
-    right: -2%;
-    top: 0;
-    height: min(46%, 300px);
-  }
-
-  .backdrop-bolt > svg {
-    --bolt-rest: 0.45;
+/* Portrait screens use the tall mobile tile. */
+@media (orientation: portrait) {
+  .bd-layer {
+    mask-image: var(--bd-m);
+    -webkit-mask-image: var(--bd-m);
   }
 }
 
-/* Desktop parallax: CSS scroll-driven animation (zero JS), translate only. */
-@supports (animation-timeline: scroll()) {
-  @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
-    .backdrop-layer,
-    .backdrop-bolt {
-      animation: backdrop-drift linear both;
-      animation-timeline: scroll(root);
-      animation-range: 0 100vh;
+/* Subtle desktop parallax: CSS scroll-driven, layers drift at different depths. */
+@supports (animation-timeline: view()) {
+  @media (orientation: landscape) and (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+    .bd-layer {
+      animation: bd-drift linear both;
+      animation-timeline: view();
+      animation-range: cover;
     }
   }
 }
 
-@keyframes backdrop-drift {
+@keyframes bd-drift {
+  from {
+    translate: 0 calc(var(--depth) * 3vh);
+  }
   to {
-    translate: 0 calc(var(--layer-depth, 0.3) * -140px);
+    translate: 0 calc(var(--depth) * -3vh);
   }
 }
 
-/* Two soft pulses over 600ms (well under 3 flashes/second, WCAG 2.3.1). */
-.backdrop-bolt > svg[data-flash] {
-  animation: bolt-flash 600ms ease-out 1 both;
+/* ---- Lightning storm (fixed layer, driven by storm-engine.ts) ----------- */
+
+.storm {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-backdrop);
+  pointer-events: none;
+  overflow: hidden;
+  contain: strict;
 }
 
-@keyframes bolt-flash {
-  0% {
-    opacity: var(--bolt-rest);
-  }
-  18% {
-    opacity: 1;
-  }
-  40% {
-    opacity: var(--bolt-rest);
-  }
-  62% {
-    opacity: 0.95;
-  }
-  100% {
-    opacity: var(--bolt-rest);
-  }
+.storm-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* Own compositor layer: strikes fade without repainting the masked bolt. */
+  will-change: opacity;
+}
+
+.storm-svg,
+.storm-wash {
+  opacity: 0;
+}
+
+.storm-wash {
+  position: absolute;
+  inset: 0;
+  background-color: var(--royal);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .backdrop-bolt > svg[data-flash] {
-    animation: none;
+  .storm {
+    display: none;
   }
 }

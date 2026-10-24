@@ -19,9 +19,9 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function PortfolioPage() {
   const m = await getMessages();
   return (
-    <div className="relative isolate">
-      <Backdrop variant="inner" />
+    <>
+      <Backdrop route="portfolio" />
       <PageHero heading={m.portfolio.heading} intro={m.portfolio.intro} />
-    </div>
+    </>
   );
 }

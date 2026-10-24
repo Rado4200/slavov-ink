@@ -17,6 +17,7 @@ const m = getMessagesFor(defaultLocale);
 
 export const metadata: Metadata = {
   title: `${m.notFound.metaTitle} | ${site.name}`,
+  robots: { index: false, follow: false },
 };
 
 export default function GlobalNotFound() {

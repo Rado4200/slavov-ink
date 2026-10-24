@@ -97,3 +97,17 @@ updates the site by only adding or removing files in Drive. Zero code edits for 
 - Middleware is named `proxy.ts` in Next 16.
 - Always check the current Next docs bundled in `node_modules/next/dist/docs` or the
   official docs before using an API.
+
+## Git and deployment workflow
+- `main` always builds and deploys (Vercel production). Never push broken code to it.
+- Do each phase on a branch `phase-<n>-<name>` (e.g. `phase-2b-atmosphere`). Commit small and
+  push after every commit; Vercel builds a preview per push. At the end, push the branch and report.
+- If the `gh` CLI is installed and authenticated, read the deployment state and preview URL from
+  the GitHub Deployments API for the report; otherwise write "check the Vercel dashboard".
+- The owner merges to `main` after review. Never merge yourself unless told "approved, merge".
+- Never store tokens in the repo. If a push needs credentials, stop and say exactly what is needed.
+- Before the first push of new work, confirm no `.env*` (other than `.env.example`) or secrets are tracked.
+
+## JS budget
+- Any new client JS above 8 KB gzipped first-load needs a written justification in the report.
+- Motion may return only via `LazyMotion` + `m` components, with a measured cost.
