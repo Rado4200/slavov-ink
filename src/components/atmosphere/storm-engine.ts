@@ -18,7 +18,13 @@ type Layer = { part: string; width: number; phoneWidth?: number; color: string; 
 
 const rand = ([min, max]: readonly [number, number]) => min + Math.random() * (max - min);
 
-export function startStorm(root: HTMLElement, cfg: StormConfig, gentle: boolean): () => void {
+/** `idleAt`: when the browser went idle; the first strike is timed from it. */
+export function startStorm(
+  root: HTMLElement,
+  cfg: StormConfig,
+  gentle: boolean,
+  idleAt: number,
+): () => void {
   const [bright, glow] = Array.from(root.querySelectorAll<SVGSVGElement>(".storm-svg"));
   const cut = root.querySelector<SVGPathElement>(".storm-cut");
   const wash = root.querySelector<HTMLElement>(".storm-wash");
@@ -150,7 +156,7 @@ export function startStorm(root: HTMLElement, cfg: StormConfig, gentle: boolean)
     .then((r) => r.json() as Promise<{ bolts: Bolt[] }>)
     .then((json) => {
       bolts = json.bolts;
-      schedule(rand(cfg.firstStrikeMs));
+      schedule(Math.max(0, rand(cfg.firstStrikeMs) - (performance.now() - idleAt)));
     })
     .catch(() => {});
 

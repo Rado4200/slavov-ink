@@ -56,10 +56,12 @@ export function LightningStorm() {
     let stop: (() => void) | undefined;
     let idle = 0;
     const hasIdle = typeof window.requestIdleCallback === "function";
-    const boot = () =>
+    const boot = () => {
+      const idleAt = performance.now();
       void import("@/components/atmosphere/storm-engine").then(({ startStorm }) => {
-        if (!cancelled) stop = startStorm(root, STORM, gentle);
+        if (!cancelled) stop = startStorm(root, STORM, gentle, idleAt);
       });
+    };
     const afterLoad = () => {
       idle = hasIdle
         ? window.requestIdleCallback(boot, { timeout: 3000 })
