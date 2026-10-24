@@ -44,9 +44,7 @@
   --text-shadow-echo: var(--text-echo);
   --text-shadow-glow: var(--text-glow);
 
-  --ease-out-expo: var(--curve-out-expo);
-  --ease-out-quart: var(--curve-out-quart);
-  --ease-in-out-quint: var(--curve-in-out-quint);
+  --ease-main: var(--curve-main);
 }
 
 @utility bg-veil {
@@ -63,6 +61,15 @@
 
 @utility duration-slow {
   transition-duration: var(--dur-slow);
+}
+
+/* Nav, buttons, labels: Manrope 600, uppercase, tracked (echoes the logo wordmark). */
+@utility label-ui {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: var(--type-label);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 @layer base {
@@ -83,6 +90,31 @@
     min-height: 100dvh;
     font-family: var(--font-sans);
     overflow-wrap: break-word;
+  }
+
+  /* Heading system (Playfair Display). Components add color/spacing only. */
+  h1 {
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: var(--type-h1);
+    line-height: 1.05;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  h2 {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: var(--type-h2);
+    line-height: 1.15;
+    letter-spacing: 0.01em;
+  }
+
+  h3 {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: var(--type-h3);
+    line-height: 1.25;
   }
 
   /* Long words (German compounds) hyphenate per <html lang>, and break as a last resort. */
