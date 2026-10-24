@@ -111,21 +111,29 @@ them and set each variant's crop to the full image, then run `pnpm brand:icons`.
 No other component changes. Once both are vectors, the on-black-only rule and
 the `mix-blend-mode: lighten` workaround can go.
 
-## Typography (provisional)
+## Typography
 
-Working pair, to be finalized after review in all four languages on `/en/dev/type`:
+Final system (specimen in all four languages: `/en/dev/type`, dev only).
 
-| Role                        | Font       | Subsets                    | Notes                                                                                               |
-| --------------------------- | ---------- | -------------------------- | --------------------------------------------------------------------------------------------------- |
-| Display (rare accents only) | Pirata One | latin, latin-ext           | **No Cyrillic.** Only for text identical in every language: the brand name, numerals (404), glyphs. |
-| Headings                    | Cormorant  | latin, latin-ext, cyrillic | High-contrast serif, close to the SLAVOV serif.                                                     |
-| Body                        | Manrope    | latin, latin-ext, cyrillic | Clean geometric sans, readable on black.                                                            |
+| Role | Font | Style |
+| --- | --- | --- |
+| H1 (page titles, 404) | Playfair Display | 800, UPPERCASE, tracking 0.05em, line-height 1.05, fluid `--type-h1` (34 px at 360 px to 88 px at 1440 px) |
+| H2 (section titles) | Playfair Display | 700, sentence case, tracking 0.01em, `--type-h2` |
+| H3 | Playfair Display | 700, `--type-h3` |
+| Body | Manrope | 400 |
+| Nav, buttons, labels | Manrope | 600, UPPERCASE, tracking 0.12em, 13–14 px (`label-ui` utility) |
+| 404 numerals only | Pirata One | blackletter accent, Latin digits |
 
-All `@font-face` rules carry a `unicode-range`, so a page downloads only the
-subsets it uses. Only Manrope is preloaded (body text is the inner pages' LCP);
-Cormorant and Pirata One swap in. Verified with DevTools platform-font data:
-every BG/EN/ES/DE sample glyph (ъ ь ю я щ, ñ ¿ ¡ á é í ó ú ü, ä ö ü ß)
-renders in Cormorant/Manrope, with no fallback font.
+The uppercase, high-contrast H1 echoes the logo wordmark (SLAVOV / INK.).
+Headings are global element styles in `src/app/globals.css`; components only add
+color and spacing. The Home page has a real, visually hidden, localized H1
+("Slavov Ink — Tattoo artist in Ruse, Bulgaria"); the logo is its visual.
+
+Subsets: Playfair Display and Manrope load latin, latin-ext and cyrillic; every
+`@font-face` has a `unicode-range`, so a page downloads only what it uses.
+No font is preloaded: the Home LCP is the logo image, and inner-page LCP text
+paints first in the next/font metric-matched fallback (`display: swap`, no CLS).
+Long German words hyphenate per `<html lang>` and break as a last resort.
 
 ## Ink atmosphere (background art)
 
