@@ -69,7 +69,7 @@ export async function Footer() {
         </p>
         {showBuildStamp ? (
           // Language-neutral build stamp (SHOW_BUILD_STAMP=off hides it); matches /version.json.
-          <p className="mt-2 text-center text-[11px] text-ash/80 tabular-nums">{`build ${shortCommit}`}</p>
+          <p className="mt-2 text-center text-[11px] text-ash tabular-nums">{`build ${shortCommit}`}</p>
         ) : null}
       </Container>
     </footer>
