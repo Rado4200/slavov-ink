@@ -7,6 +7,7 @@ import { Container } from "@/components/ui/Container";
 import { isPlaceholder, site } from "@/content/site";
 import type { SocialLink } from "@/content/site";
 import { format, getMessages } from "@/i18n/messages";
+import { shortCommit, showBuildStamp } from "@/lib/build-info";
 
 async function currentYear() {
   "use cache";
@@ -90,6 +91,12 @@ export async function Footer() {
         <p className="text-center text-xs text-ash">
           {format(m.footer.copyright, { year, brand: site.name })}
         </p>
+        {showBuildStamp ? (
+          // Language-neutral build stamp (SHOW_BUILD_STAMP=off hides it), matches /version.json.
+          <p className="mt-2 text-center text-[11px] text-ash/80 tabular-nums">
+            build {shortCommit}
+          </p>
+        ) : null}
       </Container>
     </footer>
   );

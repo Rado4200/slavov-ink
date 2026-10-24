@@ -1,0 +1,9 @@
+#!/bin/sh
+# Pre-push quality gate (installed by scripts/setup-hooks.mjs via `prepare`).
+# Uses pnpm if it is on PATH, otherwise corepack's pinned pnpm.
+set -e
+if command -v pnpm >/dev/null 2>&1; then PNPM="pnpm"; else PNPM="corepack pnpm"; fi
+echo "pre-push: lint, typecheck, i18n:check"
+$PNPM lint
+$PNPM typecheck
+$PNPM i18n:check
