@@ -34,7 +34,7 @@ export async function Header() {
             <NavLinks
               items={items}
               className="flex items-center gap-6 lg:gap-10"
-              linkClassName="relative py-2 text-sm font-medium tracking-[0.2em] whitespace-nowrap text-ash uppercase transition-colors duration-fast hover:text-bone aria-[current=page]:text-bone"
+              linkClassName="label-ui relative py-2 whitespace-nowrap text-ash transition-colors duration-fast ease-main hover:text-bone aria-[current=page]:text-bone"
             />
           </nav>
 

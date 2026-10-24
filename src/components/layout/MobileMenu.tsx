@@ -79,7 +79,7 @@ export function MobileMenu({ items, labels, footer }: MobileMenuProps) {
         onClose={() => setOpen(false)}
         onKeyDown={trapFocus}
         data-lenis-prevent
-        className="fixed inset-0 m-0 h-dvh max-h-none w-full max-w-none bg-ink bg-veil text-bone opacity-0 transition-[opacity,display,overlay] transition-discrete duration-base ease-out-quart backdrop:bg-ink open:opacity-100 md:hidden starting:open:opacity-0"
+        className="ease-out-quart fixed inset-0 m-0 h-dvh max-h-none w-full max-w-none bg-ink bg-veil text-bone opacity-0 transition-[opacity,display,overlay] transition-discrete duration-base backdrop:bg-ink open:opacity-100 md:hidden starting:open:opacity-0"
       >
         <div className="flex h-full flex-col px-gutter pb-8">
           <div className="flex h-header items-center justify-end">
@@ -101,7 +101,7 @@ export function MobileMenu({ items, labels, footer }: MobileMenuProps) {
               items={items}
               onNavigate={close}
               className="flex flex-col gap-6"
-              linkClassName="font-heading text-5xl font-medium text-silver transition-colors duration-fast hover:text-bone aria-[current=page]:text-bone aria-[current=page]:text-shadow-echo"
+              linkClassName="label-ui inline-flex min-h-11 items-center text-sm text-silver transition-colors duration-fast ease-main hover:text-bone aria-[current=page]:text-bone"
             />
           </nav>
 

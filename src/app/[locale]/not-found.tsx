@@ -24,14 +24,12 @@ export default async function NotFound() {
         >
           {m.notFound.code}
         </p>
-        <h1 className="mt-6 font-heading text-4xl font-medium text-balance text-bone sm:text-5xl">
-          {m.notFound.heading}
-        </h1>
+        <h1 className="mt-6 text-balance text-bone">{m.notFound.heading}</h1>
         <DiamondDivider variant="triple" className="my-8 max-w-xs" />
         <p className="text-silver">{m.notFound.body}</p>
         <Link
           href={localizedPath(locale, "/")}
-          className="mt-10 inline-flex min-h-11 items-center border border-royal px-6 text-sm font-semibold tracking-[0.2em] text-bone uppercase shadow-echo transition-shadow duration-base hover:shadow-glow"
+          className="mt-10 inline-flex min-h-11 items-center border border-royal px-6 label-ui text-bone shadow-echo transition-shadow duration-base ease-main hover:shadow-glow"
         >
           {m.notFound.cta}
         </Link>

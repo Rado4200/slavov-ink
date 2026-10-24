@@ -24,7 +24,16 @@ export default async function HomePage() {
   return (
     <>
       <Backdrop route="home" />
-      <PageHero heading={<Logo size="lg" preload />} intro={m.home.intro} />
+      <PageHero
+        heading={
+          <>
+            {/* Real, localized H1 for search and assistive tech; the logo is the visual. */}
+            <span className="sr-only">{format(m.home.heading, { brand: site.name })}</span>
+            <Logo size="lg" preload alt="" />
+          </>
+        }
+        intro={m.home.intro}
+      />
     </>
   );
 }

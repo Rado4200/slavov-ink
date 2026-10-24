@@ -30,7 +30,7 @@ export default function GlobalNotFound() {
         >
           {m.notFound.code}
         </p>
-        <h1 className="mt-6 font-heading text-4xl font-medium text-bone">{m.notFound.heading}</h1>
+        <h1 className="mt-6 text-balance text-bone">{m.notFound.heading}</h1>
         <p className="mt-6">{m.notFound.body}</p>
         <ul className="mt-10 flex gap-6">
           {locales.map((locale) => (
