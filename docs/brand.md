@@ -115,14 +115,14 @@ the `mix-blend-mode: lighten` workaround can go.
 
 Final system (specimen in all four languages: `/en/dev/type`, dev only).
 
-| Role | Font | Style |
-| --- | --- | --- |
+| Role                  | Font             | Style                                                                                                      |
+| --------------------- | ---------------- | ---------------------------------------------------------------------------------------------------------- |
 | H1 (page titles, 404) | Playfair Display | 800, UPPERCASE, tracking 0.05em, line-height 1.05, fluid `--type-h1` (34 px at 360 px to 88 px at 1440 px) |
-| H2 (section titles) | Playfair Display | 700, sentence case, tracking 0.01em, `--type-h2` |
-| H3 | Playfair Display | 700, `--type-h3` |
-| Body | Manrope | 400 |
-| Nav, buttons, labels | Manrope | 600, UPPERCASE, tracking 0.12em, 13–14 px (`label-ui` utility) |
-| 404 numerals only | Pirata One | blackletter accent, Latin digits |
+| H2 (section titles)   | Playfair Display | 700, sentence case, tracking 0.01em, `--type-h2`                                                           |
+| H3                    | Playfair Display | 700, `--type-h3`                                                                                           |
+| Body                  | Manrope          | 400                                                                                                        |
+| Nav, buttons, labels  | Manrope          | 600, UPPERCASE, tracking 0.12em, 13–14 px (`label-ui` utility)                                             |
+| 404 numerals only     | Pirata One       | blackletter accent, Latin digits                                                                           |
 
 The uppercase, high-contrast H1 echoes the logo wordmark (SLAVOV / INK.).
 Headings are global element styles in `src/app/globals.css`; components only add
