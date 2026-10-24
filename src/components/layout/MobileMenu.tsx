@@ -79,9 +79,9 @@ export function MobileMenu({ items, labels, footer }: MobileMenuProps) {
         onClose={() => setOpen(false)}
         onKeyDown={trapFocus}
         data-lenis-prevent
-        className="ease-out-quart fixed inset-0 m-0 h-dvh max-h-none w-full max-w-none bg-ink bg-veil text-bone opacity-0 transition-[opacity,display,overlay] transition-discrete duration-base backdrop:bg-ink open:opacity-100 md:hidden starting:open:opacity-0"
+        className="group fixed inset-0 m-0 h-dvh max-h-none w-full max-w-none bg-ink bg-veil text-bone opacity-0 transition-[opacity,display,overlay] transition-discrete duration-base ease-main backdrop:bg-ink open:opacity-100 md:hidden starting:open:opacity-0"
       >
-        <div className="flex h-full flex-col px-gutter pb-8">
+        <div className="flex h-full translate-y-3 flex-col px-gutter pb-[max(2rem,env(safe-area-inset-bottom))] transition-transform duration-base ease-main group-open:translate-y-0 starting:group-open:translate-y-3">
           <div className="flex h-header items-center justify-end">
             <button
               type="button"
@@ -100,8 +100,9 @@ export function MobileMenu({ items, labels, footer }: MobileMenuProps) {
             <NavLinks
               items={items}
               onNavigate={close}
+              marker
               className="flex flex-col gap-6"
-              linkClassName="label-ui inline-flex min-h-11 items-center text-sm text-silver transition-colors duration-fast ease-main hover:text-bone aria-[current=page]:text-bone"
+              linkClassName="nav-link label-ui inline-flex min-h-11 [--nav-line-bottom:0.5rem] items-center text-sm text-silver transition-colors duration-fast ease-main hover:text-bone aria-[current=page]:text-bone"
             />
           </nav>
 

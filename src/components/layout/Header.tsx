@@ -29,8 +29,9 @@ export async function Header() {
           <nav aria-label={m.a11y.mainNav} className="hidden md:block">
             <NavLinks
               items={items}
+              marker
               className="flex items-center gap-6 lg:gap-10"
-              linkClassName="label-ui relative py-2 whitespace-nowrap text-ash transition-colors duration-fast ease-main hover:text-bone aria-[current=page]:text-bone"
+              linkClassName="nav-link label-ui py-2 whitespace-nowrap text-ash transition-colors duration-fast ease-main hover:text-bone aria-[current=page]:text-bone"
             />
           </nav>
 

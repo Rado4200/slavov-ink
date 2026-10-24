@@ -14,9 +14,11 @@ type NavLinksProps = {
   className?: string;
   linkClassName?: string;
   onNavigate?: () => void;
+  /** Lozenge marker at the start of the underline (see .nav-link). */
+  marker?: boolean;
 };
 
-export function NavLinks({ items, className, linkClassName, onNavigate }: NavLinksProps) {
+export function NavLinks({ items, className, linkClassName, onNavigate, marker }: NavLinksProps) {
   const pathname = usePathname();
 
   return (
@@ -27,6 +29,7 @@ export function NavLinks({ items, className, linkClassName, onNavigate }: NavLin
             href={item.href}
             aria-current={item.href === pathname ? "page" : undefined}
             onClick={onNavigate}
+            data-marker={marker ? "" : undefined}
             className={linkClassName}
           >
             {item.label}

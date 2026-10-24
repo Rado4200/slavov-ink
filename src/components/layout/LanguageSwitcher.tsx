@@ -40,7 +40,7 @@ export function LanguageSwitcher({ current, label, className }: LanguageSwitcher
               lang={locale}
               aria-current={locale === current ? "page" : undefined}
               onClick={() => savePreference(locale)}
-              className="inline-flex min-h-11 min-w-9 items-center justify-center label-ui text-ash transition-colors duration-fast hover:text-bone aria-[current=page]:text-bone aria-[current=page]:underline aria-[current=page]:decoration-royal-light aria-[current=page]:underline-offset-6"
+              className="nav-link inline-flex min-h-11 min-w-9 items-center justify-center label-ui text-ash transition-colors duration-fast ease-main [--nav-line-bottom:0.625rem] [--nav-line-inset:0.5rem] hover:text-bone aria-[current=page]:text-bone"
             >
               {localeMeta[locale].label}
               <span className="sr-only"> {localeMeta[locale].endonym}</span>

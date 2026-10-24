@@ -224,3 +224,49 @@
     transition: none;
   }
 }
+
+/*
+ * Nav underline: drawn from the left (scale, compositor-only) on hover and
+ * keyboard focus, and kept on the current page. A small lozenge (the logo's
+ * diamond bullet) marks where it starts. Under reduced motion it appears
+ * without the draw (the global rule drops transform transitions).
+ */
+@layer components {
+  .nav-link {
+    position: relative;
+  }
+
+  .nav-link::after {
+    content: "";
+    position: absolute;
+    left: var(--nav-line-inset, 0);
+    right: var(--nav-line-inset, 0);
+    bottom: var(--nav-line-bottom, 0.25rem);
+    height: 1px;
+    background-color: var(--royal-light);
+    scale: 0 1;
+    transform-origin: left;
+    transition: scale var(--dur-base) var(--ease-main);
+  }
+
+  .nav-link[data-marker]::before {
+    content: "";
+    position: absolute;
+    left: calc(var(--nav-line-inset, 0px) - 2.5px);
+    bottom: calc(var(--nav-line-bottom, 0.25rem) - 2px);
+    width: 5px;
+    height: 5px;
+    background-color: var(--royal-light);
+    rotate: 45deg;
+    opacity: 0;
+    transition: opacity var(--dur-fast) var(--ease-main);
+  }
+
+  .nav-link:is(:hover, :focus-visible, [aria-current="page"])::after {
+    scale: 1 1;
+  }
+
+  .nav-link[data-marker]:is(:hover, :focus-visible, [aria-current="page"])::before {
+    opacity: 1;
+  }
+}
