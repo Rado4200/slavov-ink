@@ -51,6 +51,9 @@ updates the site by only adding or removing files in Drive. Zero code edits for 
   local sample images in `public/sample/`. The site must never show a broken page.
 
 ## Quality bar (non-negotiable)
+- Never render a link or button without a real, working destination or action. Contact
+  channels in `src/content/site.ts` are `null` until provided; null means hidden, never a
+  dead or placeholder link.
 - Mobile first. Test 360px, 768px, 1280px, 1920px.
 - Lighthouse (mobile) >= 95 for Performance, Accessibility, Best Practices, SEO.
 - WCAG AA contrast. Visible focus states. Full keyboard nav (including lightbox).

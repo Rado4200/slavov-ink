@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 export type NavLinkItem = {
-  /** Localized href ("/bg/about") or in-page anchor ("#contact"). */
+  /** Localized href, e.g. "/bg/about". */
   href: string;
   label: string;
 };

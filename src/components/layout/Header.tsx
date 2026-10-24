@@ -3,9 +3,8 @@ import Link from "next/link";
 import { Logo } from "@/components/brand/Logo";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { MobileMenu } from "@/components/layout/MobileMenu";
+import { navItems } from "@/components/layout/nav-items";
 import { NavLinks } from "@/components/layout/NavLinks";
-import type { NavLinkItem } from "@/components/layout/NavLinks";
-import { mainNav } from "@/content/navigation";
 import { site } from "@/content/site";
 import { format, getLocale, getMessages } from "@/i18n/messages";
 import { localizedPath } from "@/i18n/paths";
@@ -13,10 +12,7 @@ import { localizedPath } from "@/i18n/paths";
 export async function Header() {
   const locale = await getLocale();
   const m = await getMessages();
-  const items: NavLinkItem[] = mainNav.map((entry) => ({
-    href: entry.href.startsWith("#") ? entry.href : localizedPath(locale, entry.href),
-    label: m.nav[entry.key],
-  }));
+  const items = navItems(locale, m);
 
   return (
     <header className="sticky top-0 z-(--z-header) border-b border-ink-line bg-ink/85 backdrop-blur-md">

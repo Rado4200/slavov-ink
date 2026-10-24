@@ -1,30 +1,22 @@
 /**
- * Language-neutral studio data (names, URLs, addresses). Translatable copy
- * lives in src/messages/. Values starting with "TODO:" are placeholders
- * awaiting real info from the artist; components use `isPlaceholder` to avoid
- * rendering them as links.
+ * Language-neutral studio data. Translatable copy lives in src/messages/.
+ *
+ * Contact channels are `null` until the artist provides them; null means the
+ * link is not rendered at all (never a dead or placeholder link).
  */
-
-export type SocialLink = {
-  label: string;
-  href: string;
-};
-
 export type SiteContent = {
   name: string;
-  email: string;
-  socials: SocialLink[];
+  /** Full profile URL, e.g. "https://www.instagram.com/<handle>". */
+  instagram: string | null;
+  /** Full page URL, e.g. "https://www.facebook.com/<page>". */
+  facebook: string | null;
+  /** WhatsApp Business number in international format, digits only, e.g. "359888123456". */
+  whatsapp: string | null;
 };
 
 export const site: SiteContent = {
   name: "Slavov Ink",
-  email: "TODO: booking email address",
-  socials: [
-    { label: "Instagram", href: "TODO: https://www.instagram.com/<handle>" },
-    { label: "Facebook", href: "TODO: https://www.facebook.com/<page>" },
-  ],
+  instagram: null,
+  facebook: null,
+  whatsapp: null,
 };
-
-export function isPlaceholder(value: string): boolean {
-  return value.startsWith("TODO:");
-}

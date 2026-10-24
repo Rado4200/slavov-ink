@@ -1,8 +1,4 @@
 {
-  "contactHeading": "Контакт",
-  "bookingHeading": "Записване",
   "socialHeading": "Социални мрежи",
-  "bookingStatus": "TODO: booking status (open / closed / waitlist)",
-  "bookingInstructions": "TODO: how to book (DM, email, deposit policy)",
   "copyright": "© {year} {brand}. Всички права запазени."
 }

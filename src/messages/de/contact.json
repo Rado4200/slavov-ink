@@ -1,0 +1,21 @@
+{
+  "heading": "Schreib mir",
+  "intro": "TODO: one-line contact intro",
+  "nameLabel": "Name",
+  "emailLabel": "E-Mail",
+  "messageLabel": "Nachricht",
+  "honeypotLabel": "Dieses Feld leer lassen",
+  "submit": "Nachricht senden",
+  "sending": "Wird gesendet…",
+  "nameRequired": "Bitte gib deinen Namen ein.",
+  "emailInvalid": "Bitte gib eine gültige E-Mail-Adresse ein.",
+  "messageRequired": "Bitte schreib eine kurze Nachricht (mindestens 10 Zeichen).",
+  "notConnected": "Das Kontaktformular ist noch nicht verbunden. Bitte versuch es später noch einmal.",
+  "sendFailed": "Deine Nachricht konnte nicht gesendet werden. Bitte versuch es erneut.",
+  "tooFast": "Das ging schnell. Warte kurz und sende dann erneut.",
+  "rateLimited": "Du hast gerade eine Nachricht gesendet. Bitte warte eine Minute, bevor du eine weitere sendest.",
+  "successHeading": "Nachricht gesendet",
+  "successBody": "Danke! Ich melde mich bald bei dir.",
+  "alternatives": "Oder schreib mir über",
+  "whatsappMessage": "Hallo! Ich möchte mich nach einem Tattoo erkundigen."
+}

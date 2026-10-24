@@ -1,7 +1,7 @@
 {
   "notFound.code": "*",
-  "common.city": ["es"],
   "nav.portfolio": ["de"],
   "portfolio.metaTitle": ["de"],
-  "portfolio.heading": ["de"]
+  "portfolio.heading": ["de"],
+  "contact.nameLabel": ["de"]
 }

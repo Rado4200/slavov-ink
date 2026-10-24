@@ -1,0 +1,21 @@
+{
+  "heading": "Escríbeme",
+  "intro": "TODO: one-line contact intro",
+  "nameLabel": "Nombre",
+  "emailLabel": "Correo electrónico",
+  "messageLabel": "Mensaje",
+  "honeypotLabel": "Deja este campo vacío",
+  "submit": "Enviar mensaje",
+  "sending": "Enviando…",
+  "nameRequired": "Escribe tu nombre.",
+  "emailInvalid": "Escribe un correo electrónico válido.",
+  "messageRequired": "Escribe un mensaje breve (al menos 10 caracteres).",
+  "notConnected": "El formulario de contacto aún no está conectado. Inténtalo más tarde.",
+  "sendFailed": "No se pudo enviar tu mensaje. Inténtalo de nuevo.",
+  "tooFast": "Ha sido muy rápido. Espera un momento y vuelve a enviarlo.",
+  "rateLimited": "Acabas de enviar un mensaje. Espera un minuto antes de enviar otro.",
+  "successHeading": "Mensaje enviado",
+  "successBody": "Gracias. Te responderé pronto.",
+  "alternatives": "O escríbeme por",
+  "whatsappMessage": "¡Hola! Quiero preguntar por un tatuaje."
+}

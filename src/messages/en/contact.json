@@ -1,0 +1,21 @@
+{
+  "heading": "Get in touch",
+  "intro": "TODO: one-line contact intro",
+  "nameLabel": "Name",
+  "emailLabel": "Email",
+  "messageLabel": "Message",
+  "honeypotLabel": "Leave this field empty",
+  "submit": "Send message",
+  "sending": "Sending…",
+  "nameRequired": "Please enter your name.",
+  "emailInvalid": "Please enter a valid email address.",
+  "messageRequired": "Please write a short message (at least 10 characters).",
+  "notConnected": "The contact form is not connected yet. Please try again later.",
+  "sendFailed": "Your message could not be sent. Please try again.",
+  "tooFast": "That was quick. Please take a moment, then send again.",
+  "rateLimited": "You just sent a message. Please wait a minute before sending another.",
+  "successHeading": "Message sent",
+  "successBody": "Thank you. I will get back to you soon.",
+  "alternatives": "Or reach me on",
+  "whatsappMessage": "Hi! I would like to ask about a tattoo."
+}
